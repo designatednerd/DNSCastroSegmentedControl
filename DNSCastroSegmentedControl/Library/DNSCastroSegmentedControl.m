@@ -27,7 +27,7 @@ static NSTimeInterval AnimationDuration = 0.1;
     [super layoutSubviews];
     
     if (!self.choices) {
-        NSLog(@"No choices set!");
+        NSAssert(@"NO", @"Cannot setup with no choices set!");
     }
     
     if (self.choices && !self.sectionViews) {
@@ -67,7 +67,7 @@ static NSTimeInterval AnimationDuration = 0.1;
         view.translatesAutoresizingMaskIntoConstraints = NO;
         
         //DEBUG
-        [self addDebugBorderOfColor:[UIColor greenColor] toView:view];
+//        [self addDebugBorderOfColor:[UIColor greenColor] toView:view];
         
         [self addSubview:view];
         
@@ -103,7 +103,6 @@ static NSTimeInterval AnimationDuration = 0.1;
         [self addBorderOfColor:self.selectionViewColor toView:self.selectionView];
     } else {
         [self addBorderOfColor:self.tintColor toView:self.selectionView];
-
     }
         
     [self addSubview:self.selectionView];
@@ -186,6 +185,7 @@ static NSTimeInterval AnimationDuration = 0.1;
         return label;
     } else if ([choice isKindOfClass:[UIImage class]]) {
         UIImageView *imageView = [[UIImageView alloc] initWithImage:(UIImage *)choice];
+        imageView.contentMode = UIViewContentModeCenter;
         if (self.choiceColor) {
             imageView.tintColor = self.choiceColor;
         } else {
@@ -250,6 +250,16 @@ static NSTimeInterval AnimationDuration = 0.1;
 
 #pragma mark - Overridden setters
 
+- (void)setSelectionViewColor:(UIColor *)selectionViewColor
+{
+    _selectionViewColor = selectionViewColor;
+    
+    if (self.selectionView) {
+        //Update the border color
+        [self addBorderOfColor:selectionViewColor toView:self.selectionView];
+    }
+}
+
 #pragma mark - Touch handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -312,8 +322,6 @@ static NSTimeInterval AnimationDuration = 0.1;
 
 - (void)touchesEndedOrCancelled
 {
-    NSLog(@"ENDED OR CANCELLED");
-    
     [UIView animateWithDuration:AnimationDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
