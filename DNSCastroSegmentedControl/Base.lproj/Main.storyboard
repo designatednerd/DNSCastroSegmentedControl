@@ -17,14 +17,14 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ovI-wb-jw2" customClass="DNSCastroSegmentedControl">
-                                <rect key="frame" x="40" y="60" width="520" height="30"/>
+                                <rect key="frame" x="40" y="60" width="520" height="50"/>
                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="rVG-HB-fXl"/>
+                                    <constraint firstAttribute="height" constant="50" id="rVG-HB-fXl"/>
                                 </constraints>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="ovI-wb-jw2" secondAttribute="trailing" constant="40" id="9Wu-6r-EUg"/>
                             <constraint firstItem="ovI-wb-jw2" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="40" id="EJz-hh-gN4"/>

@@ -8,7 +8,7 @@
 
 #import "DNSCastroSegmentedControl.h"
 
-static CGFloat TopAndBottomPadding = 2;
+static CGFloat TopAndBottomPadding = 3;
 static NSTimeInterval AnimationDuration = 0.1;
 
 @interface DNSCastroSegmentedControl()
@@ -17,7 +17,6 @@ static NSTimeInterval AnimationDuration = 0.1;
 @property (nonatomic) CGPoint initialTouchPoint;
 @property (nonatomic) NSLayoutConstraint *selectionLeftConstraint;
 @property (nonatomic) NSInteger initialConstraintConstant;
-@property (nonatomic) UIView *backgroundView;
 
 @end
 
@@ -27,39 +26,34 @@ static NSTimeInterval AnimationDuration = 0.1;
 {
     [super layoutSubviews];
     
+    if (!self.choices) {
+        NSLog(@"No choices set!");
+    }
+    
     if (self.choices && !self.sectionViews) {
-        [self setupBackgroundView];
+        //Perform initial setup.
+        [self setupKVO];
         [self setupSectionViews];
         [self setupSelectionView];
         [self roundAllTheThings];
+        [self setSelectedIndex:self.selectedIndex animated:NO];
+        [self snapToCurrentSection];
     }
-    
-    //TODO: Handle rotation.
+}
+
+- (void)dealloc
+{
+    [self removeObserver:self forKeyPath:[self boundsKeyPath]];
 }
 
 #pragma mark - Setup Helpers
 
-- (void)setupBackgroundView
+- (void)setupKVO
 {
-    [self addDebugBorderOfColor:[UIColor blueColor] toView:self];
-    
-    UIColor *backgroundColor = self.backgroundColor;
-    [super setBackgroundColor:[UIColor clearColor]];
-    
-    self.backgroundView = [[UIView alloc] init];
-    self.backgroundView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.backgroundView.backgroundColor = backgroundColor;
-    
-    [self addSubview:self.backgroundView];
-
-    NSDictionary *bindings = NSDictionaryOfVariableBindings(_backgroundView);
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(padding)-[_backgroundView]-(padding)-|"
-                                                                options:0
-                                                                 metrics:@{ @"padding" : @(TopAndBottomPadding) } views:bindings]];
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_backgroundView]|"
-                                                                 options:0
-                                                                 metrics:nil
-                                                                   views:bindings]];
+    [self addObserver:self
+           forKeyPath:[self boundsKeyPath]
+              options:0
+              context:NULL];
 }
 
 - (void)setupSectionViews
@@ -105,11 +99,13 @@ static NSTimeInterval AnimationDuration = 0.1;
     self.selectionView = [[UIView alloc] init];
     self.selectionView.translatesAutoresizingMaskIntoConstraints = NO;
     
-    self.selectionView.layer.borderColor = [UIColor redColor].CGColor;
-    self.selectionView.layer.borderWidth = 1;
-    
-    self.selectionView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.5];
-    
+    if (self.selectionViewColor) {
+        [self addBorderOfColor:self.selectionViewColor toView:self.selectionView];
+    } else {
+        [self addBorderOfColor:self.tintColor toView:self.selectionView];
+
+    }
+        
     [self addSubview:self.selectionView];
     [self pinViewToWidth:self.selectionView];
     [self pinViewToTopAndBottom:self.selectionView withPadding:TopAndBottomPadding];
@@ -126,20 +122,19 @@ static NSTimeInterval AnimationDuration = 0.1;
 
 - (void)roundAllTheThings
 {
-    CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2) - TopAndBottomPadding;
-    self.backgroundView.layer.cornerRadius = cornerRadius;
-    self.selectionView.layer.cornerRadius = cornerRadius;
+    CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2);
+    self.layer.cornerRadius = cornerRadius;
+    self.selectionView.layer.cornerRadius = cornerRadius - TopAndBottomPadding;
 }
 
 - (void)pinViewToWidth:(UIView *)view
 {
-    CGFloat percent = (1.0 / self.choices.count);
     [self addConstraint:[NSLayoutConstraint constraintWithItem:view
                                                      attribute:NSLayoutAttributeWidth
                                                      relatedBy:NSLayoutRelationEqual
                                                         toItem:self
                                                      attribute:NSLayoutAttributeWidth
-                                                    multiplier:percent
+                                                    multiplier:[self sectionPercentage]
                                                       constant:0]];
 }
 
@@ -181,15 +176,62 @@ static NSTimeInterval AnimationDuration = 0.1;
             if (self.labelFont) {
                 label.font = self.labelFont;
             }
+            
+            if (self.choiceColor) {
+                label.textColor = self.choiceColor;
+            } else {
+                label.textColor = self.tintColor;
+            }
         }
         return label;
     } else if ([choice isKindOfClass:[UIImage class]]) {
-        return [[UIImageView alloc] initWithImage:(UIImage *)choice];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:(UIImage *)choice];
+        if (self.choiceColor) {
+            imageView.tintColor = self.choiceColor;
+        } else {
+            imageView.tintColor = self.tintColor;
+        }
+        
+        return imageView;
     } else {
         NSAssert(NO, @"Unsupported choice type %@", NSStringFromClass([choice class]));
         return nil;
     }
 }
+
+#pragma mark - Measurements
+
+- (CGFloat)sectionPercentage
+{
+    return (1.0 / self.choices.count);
+}
+
+- (CGFloat)pointsPerSection
+{
+    return CGRectGetWidth(self.frame) * [self sectionPercentage];
+}
+
+#pragma mark - KVO
+
+- (NSString *)boundsKeyPath
+{
+    return NSStringFromSelector(@selector(bounds));
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if ([keyPath isEqualToString:[self boundsKeyPath]]
+        && object == self) {
+        //The bounds of the view have changed - we've had a rotation.
+        [self snapToCurrentSection];
+    } else {
+        [super observeValueForKeyPath:keyPath
+                             ofObject:object
+                               change:change
+                              context:context];
+    }
+}
+
 
 #pragma mark - Debug helpers
 
@@ -208,15 +250,6 @@ static NSTimeInterval AnimationDuration = 0.1;
 
 #pragma mark - Overridden setters
 
-- (void)setBackgroundColor:(UIColor *)backgroundColor
-{
-    if (self.backgroundView) {
-        self.backgroundView.backgroundColor = backgroundColor;
-    } else {
-        [super setBackgroundColor:backgroundColor];
-    }
-}
-
 #pragma mark - Touch handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -227,7 +260,7 @@ static NSTimeInterval AnimationDuration = 0.1;
     self.initialTouchPoint = [touch locationInView:self];
     self.initialConstraintConstant = self.selectionLeftConstraint.constant;
     
-    CGFloat scaleXPercentage = (TopAndBottomPadding * 2) / CGRectGetHeight(self.backgroundView.frame);
+    CGFloat scaleXPercentage = (TopAndBottomPadding * 2) / (CGRectGetHeight(self.frame) - (TopAndBottomPadding * 2));
     
     [UIView animateWithDuration:AnimationDuration
                           delay:0
@@ -258,7 +291,11 @@ static NSTimeInterval AnimationDuration = 0.1;
     
     self.selectionLeftConstraint.constant = constantVSMax;
     
-    //TODO: Calculate highlighting.
+    //Figure out where we're at.
+    CGFloat section = constantVSMax / [self pointsPerSection];
+    NSInteger roundedSection = roundf(section);
+    
+    [self setSelectedIndex:roundedSection animated:YES];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -277,9 +314,6 @@ static NSTimeInterval AnimationDuration = 0.1;
 {
     NSLog(@"ENDED OR CANCELLED");
     
-    //TODO: Calculate where to release.
-    
-    
     [UIView animateWithDuration:AnimationDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
@@ -287,6 +321,46 @@ static NSTimeInterval AnimationDuration = 0.1;
                          self.selectionView.transform = CGAffineTransformIdentity;
                      }
                      completion:nil];
+    
+    [UIView animateWithDuration:AnimationDuration * 2
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         [self snapToCurrentSection];
+                     }
+                     completion:nil];
+}
+
+- (void)snapToCurrentSection
+{
+    self.selectionLeftConstraint.constant = self.selectedIndex * [self pointsPerSection];
+    [self layoutIfNeeded];
+}
+
+- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated
+{
+    if (self.selectedIndex != selectedIndex
+        || ! animated) {
+        self.selectedIndex = selectedIndex;
+        NSInteger duration = AnimationDuration * 2;
+        if (!animated) {
+            duration = 0;
+        }
+        [UIView animateWithDuration:duration
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^{
+                             for (NSInteger i = 0; i < self.sectionViews.count; i++) {
+                                 UIView *currentView = self.sectionViews[i];
+                                 if (i == selectedIndex) {
+                                     currentView.alpha = 1;
+                                 } else {
+                                     currentView.alpha = 0.5;
+                                 }
+                             }
+                         }
+                         completion:nil];
+    }
 }
 
 @end
