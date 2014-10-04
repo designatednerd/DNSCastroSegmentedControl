@@ -25,6 +25,7 @@
         NSMutableArray *sectionViews = [NSMutableArray arrayWithCapacity:self.choices.count];
         NSMutableString *autolayoutString = [NSMutableString stringWithString:@"H:|"];
         NSMutableDictionary *autolayoutViews = [NSMutableDictionary dictionary];
+
         for (NSInteger i = 0; i < self.choices.count; i++) {
             UIView *view = [self viewForChoice:self.choices[i]];
             view.translatesAutoresizingMaskIntoConstraints = NO;
@@ -37,14 +38,16 @@
             
             NSString *viewName = [NSString stringWithFormat:@"view%@", @(i)];
             
-            [autolayoutString appendFormat:@"[%@]", viewName];
-            NSDictionary *currentView = @{ viewName : view };
-            [autolayoutViews addEntriesFromDictionary:currentView];
-            [sectionViews addObject:view];
+            //Pin width to percentage
+            [self pinViewToWidth:view];
             
-            //Pin top and bottom
-            NSString *visualFormat = [NSString stringWithFormat:@"V:|[%@]|", viewName];
-            [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:visualFormat options:0 metrics:nil views:currentView]];
+            //Pin to top and bottom
+            [self pinViewToTopAndBottom:view];
+        
+            //Add to autolayout string to allow pinning next to each other.
+            [autolayoutString appendFormat:@"[%@]", viewName];
+            [autolayoutViews addEntriesFromDictionary:@{ viewName : view }];
+            [sectionViews addObject:view];
         }
         
         [autolayoutString appendString:@"|"];
@@ -56,6 +59,30 @@
         self.sectionViews = sectionViews;
         
     }
+}
+
+#pragma mark - Setup Helpers
+
+- (void)pinViewToWidth:(UIView *)view
+{
+    CGFloat percent = (1.0 / self.choices.count);
+    [self addConstraint:[NSLayoutConstraint constraintWithItem:view
+                                                     attribute:NSLayoutAttributeWidth
+                                                     relatedBy:NSLayoutRelationEqual
+                                                        toItem:self
+                                                     attribute:NSLayoutAttributeWidth
+                                                    multiplier:percent
+                                                      constant:0]];
+}
+
+- (void)pinViewToTopAndBottom:(UIView *)view
+{
+    NSDictionary *currentView = NSDictionaryOfVariableBindings(view);
+    NSString *visualFormat = [NSString stringWithFormat:@"V:|[%@]|", NSStringFromSelector(@selector(view))];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:visualFormat
+                                                                 options:0
+                                                                 metrics:nil
+                                                                   views:currentView]];
 }
 
 /**
@@ -74,6 +101,10 @@
         } else {
             //Set regular text.
             label.text = (NSString *)choice;
+            label.textAlignment = NSTextAlignmentCenter;
+            if (self.font) {
+                label.font = self.font;
+            }
         }
         return label;
     } else if ([choice isKindOfClass:[UIImage class]]) {

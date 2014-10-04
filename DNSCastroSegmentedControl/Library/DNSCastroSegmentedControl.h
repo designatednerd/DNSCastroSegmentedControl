@@ -12,5 +12,6 @@
 
 @property (nonatomic) NSArray *choices;
 @property (nonatomic) NSInteger selectedIndex;
+@property (nonatomic) UIFont *font;
 
 @end
