@@ -8,6 +8,8 @@
 
 #import "DNSCastroSegmentedControl.h"
 
+static CGFloat TopAndBottomPadding = 2;
+
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
 @property (nonatomic) NSArray *sectionViews;
@@ -26,6 +28,7 @@
     if (self.choices && !self.sectionViews) {
         [self setupSectionViews];
         [self setupSelectionView];
+        [self roundAllTheThings];
     }
 }
 
@@ -78,6 +81,8 @@
     self.selectionView.layer.borderColor = [UIColor redColor].CGColor;
     self.selectionView.layer.borderWidth = 1;
     
+    self.selectionView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.5];
+    
     [self addSubview:self.selectionView];
     [self pinViewToWidth:self.selectionView];
     [self pinViewToTopAndBottom:self.selectionView];
@@ -90,6 +95,13 @@
                                                                multiplier:1
                                                                  constant:0];
     [self addConstraint:self.selectionLeftConstraint];
+}
+
+- (void)roundAllTheThings
+{
+    CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2);
+    self.layer.cornerRadius = cornerRadius;
+    self.selectionView.layer.cornerRadius = cornerRadius + TopAndBottomPadding;
 }
 
 - (void)pinViewToWidth:(UIView *)view
@@ -106,12 +118,20 @@
 
 - (void)pinViewToTopAndBottom:(UIView *)view
 {
-    NSDictionary *currentView = NSDictionaryOfVariableBindings(view);
-    NSString *visualFormat = [NSString stringWithFormat:@"V:|[%@]|", NSStringFromSelector(@selector(view))];
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:visualFormat
-                                                                 options:0
-                                                                 metrics:nil
-                                                                   views:currentView]];
+    [self addConstraint:[NSLayoutConstraint constraintWithItem:view
+                                                     attribute:NSLayoutAttributeTop
+                                                     relatedBy:NSLayoutRelationEqual
+                                                        toItem:self
+                                                     attribute:NSLayoutAttributeTop
+                                                    multiplier:1
+                                                      constant:-TopAndBottomPadding]];
+    [self addConstraint:[NSLayoutConstraint constraintWithItem:view
+                                                     attribute:NSLayoutAttributeBottom
+                                                     relatedBy:NSLayoutRelationEqual
+                                                        toItem:self
+                                                     attribute:NSLayoutAttributeBottom
+                                                    multiplier:1
+                                                      constant:TopAndBottomPadding]];
 }
 
 /**
@@ -161,12 +181,15 @@
     
     UITouch *touch = [touches anyObject];
     CGPoint currentTouch = [touch locationInView:self];
-    
     CGFloat deltaX = currentTouch.x - self.initialTouchPoint.x;
     
-    self.selectionLeftConstraint.constant = self.initialConstraintConstant + deltaX;
-    NSLog(@"DX %@", @(deltaX));
+    CGFloat calculatedConstant = self.initialConstraintConstant + deltaX;
+    CGFloat constantVSMin = MAX(0, calculatedConstant);
     
+    CGFloat maxX = CGRectGetWidth(self.frame) - CGRectGetWidth(self.selectionView.frame);
+    CGFloat constantVSMax = MIN(constantVSMin, maxX);
+    
+    self.selectionLeftConstraint.constant = constantVSMax;    
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
