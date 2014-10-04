@@ -14,6 +14,7 @@
 		9B7821A619DF9D8700C340C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B7821A519DF9D8700C340C7 /* Images.xcassets */; };
 		9B7821A919DF9D8700C340C7 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9B7821A719DF9D8700C340C7 /* LaunchScreen.xib */; };
 		9B7821B519DF9D8700C340C7 /* DNSCastroSegmentedControlTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7821B419DF9D8700C340C7 /* DNSCastroSegmentedControlTests.m */; };
+		9B7821C119DF9DD800C340C7 /* DNSCastroSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B7821C019DF9DD800C340C7 /* DNSCastroSegmentedControl.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,8 @@
 		9B7821AE19DF9D8700C340C7 /* DNSCastroSegmentedControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DNSCastroSegmentedControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B7821B319DF9D8700C340C7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B7821B419DF9D8700C340C7 /* DNSCastroSegmentedControlTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DNSCastroSegmentedControlTests.m; sourceTree = "<group>"; };
+		9B7821BF19DF9DD800C340C7 /* DNSCastroSegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DNSCastroSegmentedControl.h; sourceTree = "<group>"; };
+		9B7821C019DF9DD800C340C7 /* DNSCastroSegmentedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DNSCastroSegmentedControl.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +88,7 @@
 				9B78219D19DF9D8700C340C7 /* AppDelegate.m */,
 				9B78219F19DF9D8700C340C7 /* ViewController.h */,
 				9B7821A019DF9D8700C340C7 /* ViewController.m */,
+				9B7821BE19DF9DC900C340C7 /* Library */,
 				9B7821A219DF9D8700C340C7 /* Main.storyboard */,
 				9B7821A519DF9D8700C340C7 /* Images.xcassets */,
 				9B7821A719DF9D8700C340C7 /* LaunchScreen.xib */,
@@ -117,6 +121,15 @@
 				9B7821B319DF9D8700C340C7 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9B7821BE19DF9DC900C340C7 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				9B7821BF19DF9DD800C340C7 /* DNSCastroSegmentedControl.h */,
+				9B7821C019DF9DD800C340C7 /* DNSCastroSegmentedControl.m */,
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,6 +232,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B7821C119DF9DD800C340C7 /* DNSCastroSegmentedControl.m in Sources */,
 				9B7821A119DF9D8700C340C7 /* ViewController.m in Sources */,
 				9B78219E19DF9D8700C340C7 /* AppDelegate.m in Sources */,
 				9B78219B19DF9D8700C340C7 /* main.m in Sources */,

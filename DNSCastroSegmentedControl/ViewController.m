@@ -8,20 +8,20 @@
 
 #import "ViewController.h"
 
-@interface ViewController ()
+#import "DNSCastroSegmentedControl.h"
 
+@interface ViewController ()
+@property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @end
 
 @implementation ViewController
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    
+    self.segmentedControl.choices = @[@"one", @"two", @"three"];
 }
 
 @end
