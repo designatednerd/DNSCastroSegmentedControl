@@ -11,7 +11,9 @@
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
 @property (nonatomic) NSArray *sectionViews;
-@property (nonatomic) UITouch *initialTouch;
+@property (nonatomic) CGPoint initialTouchPoint;
+@property (nonatomic) NSLayoutConstraint *selectionLeftConstraint;
+@property (nonatomic) NSInteger initialConstraintConstant;
 
 @end
 
@@ -22,46 +24,73 @@
     [super layoutSubviews];
     
     if (self.choices && !self.sectionViews) {
-        NSMutableArray *sectionViews = [NSMutableArray arrayWithCapacity:self.choices.count];
-        NSMutableString *autolayoutString = [NSMutableString stringWithString:@"H:|"];
-        NSMutableDictionary *autolayoutViews = [NSMutableDictionary dictionary];
-
-        for (NSInteger i = 0; i < self.choices.count; i++) {
-            UIView *view = [self viewForChoice:self.choices[i]];
-            view.translatesAutoresizingMaskIntoConstraints = NO;
-            
-            //DEBUG
-            view.layer.borderColor = [UIColor greenColor].CGColor;
-            view.layer.borderWidth = 1;
-            
-            [self addSubview:view];
-            
-            NSString *viewName = [NSString stringWithFormat:@"view%@", @(i)];
-            
-            //Pin width to percentage
-            [self pinViewToWidth:view];
-            
-            //Pin to top and bottom
-            [self pinViewToTopAndBottom:view];
-        
-            //Add to autolayout string to allow pinning next to each other.
-            [autolayoutString appendFormat:@"[%@]", viewName];
-            [autolayoutViews addEntriesFromDictionary:@{ viewName : view }];
-            [sectionViews addObject:view];
-        }
-        
-        [autolayoutString appendString:@"|"];
-        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:autolayoutString
-                                                                     options:0
-                                                                     metrics:nil
-                                                                       views:autolayoutViews]];
-        
-        self.sectionViews = sectionViews;
-        
+        [self setupSectionViews];
+        [self setupSelectionView];
     }
 }
 
 #pragma mark - Setup Helpers
+
+- (void)setupSectionViews
+{
+    NSMutableArray *sectionViews = [NSMutableArray arrayWithCapacity:self.choices.count];
+    NSMutableString *autolayoutString = [NSMutableString stringWithString:@"H:|"];
+    NSMutableDictionary *autolayoutViews = [NSMutableDictionary dictionary];
+    
+    for (NSInteger i = 0; i < self.choices.count; i++) {
+        UIView *view = [self viewForChoice:self.choices[i]];
+        view.translatesAutoresizingMaskIntoConstraints = NO;
+        
+        //DEBUG
+        view.layer.borderColor = [UIColor greenColor].CGColor;
+        view.layer.borderWidth = 1;
+        
+        [self addSubview:view];
+        
+        NSString *viewName = [NSString stringWithFormat:@"view%@", @(i)];
+        
+        //Pin width to percentage
+        [self pinViewToWidth:view];
+        
+        //Pin to top and bottom
+        [self pinViewToTopAndBottom:view];
+        
+        //Add to autolayout string to allow pinning next to each other.
+        [autolayoutString appendFormat:@"[%@]", viewName];
+        [autolayoutViews addEntriesFromDictionary:@{ viewName : view }];
+        [sectionViews addObject:view];
+    }
+    
+    [autolayoutString appendString:@"|"];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:autolayoutString
+                                                                 options:0
+                                                                 metrics:nil
+                                                                   views:autolayoutViews]];
+    
+    self.sectionViews = sectionViews;
+}
+
+- (void)setupSelectionView
+{
+    self.selectionView = [[UIView alloc] init];
+    self.selectionView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    self.selectionView.layer.borderColor = [UIColor redColor].CGColor;
+    self.selectionView.layer.borderWidth = 1;
+    
+    [self addSubview:self.selectionView];
+    [self pinViewToWidth:self.selectionView];
+    [self pinViewToTopAndBottom:self.selectionView];
+    
+    self.selectionLeftConstraint = [NSLayoutConstraint constraintWithItem:self.selectionView
+                                                                attribute:NSLayoutAttributeLeft
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self
+                                                                attribute:NSLayoutAttributeLeft
+                                                               multiplier:1
+                                                                 constant:0];
+    [self addConstraint:self.selectionLeftConstraint];
+}
 
 - (void)pinViewToWidth:(UIView *)view
 {
@@ -120,12 +149,24 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesBegan:touches withEvent:event];
-    self.initialTouch = [touches anyObject];
+    
+    UITouch *touch = [touches anyObject];
+    self.initialTouchPoint = [touch locationInView:self];
+    self.initialConstraintConstant = self.selectionLeftConstraint.constant;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesMoved:touches withEvent:event];
+    
+    UITouch *touch = [touches anyObject];
+    CGPoint currentTouch = [touch locationInView:self];
+    
+    CGFloat deltaX = currentTouch.x - self.initialTouchPoint.x;
+    
+    self.selectionLeftConstraint.constant = self.initialConstraintConstant + deltaX;
+    NSLog(@"DX %@", @(deltaX));
+    
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
