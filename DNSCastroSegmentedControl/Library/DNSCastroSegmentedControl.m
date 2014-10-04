@@ -9,6 +9,7 @@
 #import "DNSCastroSegmentedControl.h"
 
 static CGFloat TopAndBottomPadding = 2;
+static NSTimeInterval AnimationDuration = 0.1;
 
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
@@ -16,6 +17,7 @@ static CGFloat TopAndBottomPadding = 2;
 @property (nonatomic) CGPoint initialTouchPoint;
 @property (nonatomic) NSLayoutConstraint *selectionLeftConstraint;
 @property (nonatomic) NSInteger initialConstraintConstant;
+@property (nonatomic) UIView *backgroundView;
 
 @end
 
@@ -26,13 +28,39 @@ static CGFloat TopAndBottomPadding = 2;
     [super layoutSubviews];
     
     if (self.choices && !self.sectionViews) {
+        [self setupBackgroundView];
         [self setupSectionViews];
         [self setupSelectionView];
         [self roundAllTheThings];
     }
+    
+    //TODO: Handle rotation.
 }
 
 #pragma mark - Setup Helpers
+
+- (void)setupBackgroundView
+{
+    [self addDebugBorderOfColor:[UIColor blueColor] toView:self];
+    
+    UIColor *backgroundColor = self.backgroundColor;
+    [super setBackgroundColor:[UIColor clearColor]];
+    
+    self.backgroundView = [[UIView alloc] init];
+    self.backgroundView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.backgroundView.backgroundColor = backgroundColor;
+    
+    [self addSubview:self.backgroundView];
+
+    NSDictionary *bindings = NSDictionaryOfVariableBindings(_backgroundView);
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(padding)-[_backgroundView]-(padding)-|"
+                                                                options:0
+                                                                 metrics:@{ @"padding" : @(TopAndBottomPadding) } views:bindings]];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_backgroundView]|"
+                                                                 options:0
+                                                                 metrics:nil
+                                                                   views:bindings]];
+}
 
 - (void)setupSectionViews
 {
@@ -45,8 +73,7 @@ static CGFloat TopAndBottomPadding = 2;
         view.translatesAutoresizingMaskIntoConstraints = NO;
         
         //DEBUG
-        view.layer.borderColor = [UIColor greenColor].CGColor;
-        view.layer.borderWidth = 1;
+        [self addDebugBorderOfColor:[UIColor greenColor] toView:view];
         
         [self addSubview:view];
         
@@ -56,7 +83,7 @@ static CGFloat TopAndBottomPadding = 2;
         [self pinViewToWidth:view];
         
         //Pin to top and bottom
-        [self pinViewToTopAndBottom:view];
+        [self pinViewToTopAndBottom:view withPadding:TopAndBottomPadding];
         
         //Add to autolayout string to allow pinning next to each other.
         [autolayoutString appendFormat:@"[%@]", viewName];
@@ -85,7 +112,7 @@ static CGFloat TopAndBottomPadding = 2;
     
     [self addSubview:self.selectionView];
     [self pinViewToWidth:self.selectionView];
-    [self pinViewToTopAndBottom:self.selectionView];
+    [self pinViewToTopAndBottom:self.selectionView withPadding:TopAndBottomPadding];
     
     self.selectionLeftConstraint = [NSLayoutConstraint constraintWithItem:self.selectionView
                                                                 attribute:NSLayoutAttributeLeft
@@ -99,9 +126,9 @@ static CGFloat TopAndBottomPadding = 2;
 
 - (void)roundAllTheThings
 {
-    CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2);
-    self.layer.cornerRadius = cornerRadius;
-    self.selectionView.layer.cornerRadius = cornerRadius + TopAndBottomPadding;
+    CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2) - TopAndBottomPadding;
+    self.backgroundView.layer.cornerRadius = cornerRadius;
+    self.selectionView.layer.cornerRadius = cornerRadius;
 }
 
 - (void)pinViewToWidth:(UIView *)view
@@ -116,7 +143,7 @@ static CGFloat TopAndBottomPadding = 2;
                                                       constant:0]];
 }
 
-- (void)pinViewToTopAndBottom:(UIView *)view
+- (void)pinViewToTopAndBottom:(UIView *)view withPadding:(CGFloat)padding
 {
     [self addConstraint:[NSLayoutConstraint constraintWithItem:view
                                                      attribute:NSLayoutAttributeTop
@@ -124,14 +151,14 @@ static CGFloat TopAndBottomPadding = 2;
                                                         toItem:self
                                                      attribute:NSLayoutAttributeTop
                                                     multiplier:1
-                                                      constant:-TopAndBottomPadding]];
+                                                      constant:padding]];
     [self addConstraint:[NSLayoutConstraint constraintWithItem:view
                                                      attribute:NSLayoutAttributeBottom
                                                      relatedBy:NSLayoutRelationEqual
                                                         toItem:self
                                                      attribute:NSLayoutAttributeBottom
                                                     multiplier:1
-                                                      constant:TopAndBottomPadding]];
+                                                      constant:-padding]];
 }
 
 /**
@@ -151,8 +178,8 @@ static CGFloat TopAndBottomPadding = 2;
             //Set regular text.
             label.text = (NSString *)choice;
             label.textAlignment = NSTextAlignmentCenter;
-            if (self.font) {
-                label.font = self.font;
+            if (self.labelFont) {
+                label.font = self.labelFont;
             }
         }
         return label;
@@ -161,6 +188,32 @@ static CGFloat TopAndBottomPadding = 2;
     } else {
         NSAssert(NO, @"Unsupported choice type %@", NSStringFromClass([choice class]));
         return nil;
+    }
+}
+
+#pragma mark - Debug helpers
+
+- (void)addDebugBorderOfColor:(UIColor *)color toView:(UIView *)view
+{
+#ifdef DEBUG
+    [self addBorderOfColor:color toView:view];
+#endif
+}
+
+- (void)addBorderOfColor:(UIColor *)color toView:(UIView *)view
+{
+    view.layer.borderWidth = 1;
+    view.layer.borderColor = color.CGColor;
+}
+
+#pragma mark - Overridden setters
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor
+{
+    if (self.backgroundView) {
+        self.backgroundView.backgroundColor = backgroundColor;
+    } else {
+        [super setBackgroundColor:backgroundColor];
     }
 }
 
@@ -173,6 +226,16 @@ static CGFloat TopAndBottomPadding = 2;
     UITouch *touch = [touches anyObject];
     self.initialTouchPoint = [touch locationInView:self];
     self.initialConstraintConstant = self.selectionLeftConstraint.constant;
+    
+    CGFloat scaleXPercentage = (TopAndBottomPadding * 2) / CGRectGetHeight(self.backgroundView.frame);
+    
+    [UIView animateWithDuration:AnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         self.selectionView.transform = CGAffineTransformMakeScale(1, (1 + scaleXPercentage));
+                     }
+                     completion:nil];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -184,12 +247,18 @@ static CGFloat TopAndBottomPadding = 2;
     CGFloat deltaX = currentTouch.x - self.initialTouchPoint.x;
     
     CGFloat calculatedConstant = self.initialConstraintConstant + deltaX;
+    
+    //Get the larger of 0 and the calculated constant.
     CGFloat constantVSMin = MAX(0, calculatedConstant);
     
     CGFloat maxX = CGRectGetWidth(self.frame) - CGRectGetWidth(self.selectionView.frame);
+    
+    //Get the smaller of the previous comparison and the calculated max X.
     CGFloat constantVSMax = MIN(constantVSMin, maxX);
     
-    self.selectionLeftConstraint.constant = constantVSMax;    
+    self.selectionLeftConstraint.constant = constantVSMax;
+    
+    //TODO: Calculate highlighting.
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -207,6 +276,17 @@ static CGFloat TopAndBottomPadding = 2;
 - (void)touchesEndedOrCancelled
 {
     NSLog(@"ENDED OR CANCELLED");
+    
+    //TODO: Calculate where to release.
+    
+    
+    [UIView animateWithDuration:AnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         self.selectionView.transform = CGAffineTransformIdentity;
+                     }
+                     completion:nil];
 }
 
 @end

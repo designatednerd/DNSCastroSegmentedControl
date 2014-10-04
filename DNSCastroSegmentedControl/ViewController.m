@@ -22,7 +22,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     self.segmentedControl.choices = @[@"one", @"two", @"three"];
-    self.segmentedControl.font = [UIFont fontWithName:@"Chalkduster" size:17];
+    self.segmentedControl.labelFont = [UIFont fontWithName:@"Chalkduster" size:17];
 }
 
 @end
