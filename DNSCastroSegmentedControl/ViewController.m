@@ -13,6 +13,7 @@
 @interface ViewController ()
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *stairsSegmentedControl;
+@property (nonatomic) DNSCastroSegmentedControl *programmaticSegmentedControl;
 @end
 
 @implementation ViewController
@@ -38,6 +39,56 @@
     self.stairsSegmentedControl.tintColor = [UIColor whiteColor];
     self.stairsSegmentedControl.choiceColor = [UIColor yellowColor];
     self.stairsSegmentedControl.selectionViewColor = [UIColor redColor];
+}
+
+- (void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    
+    if (!self.programmaticSegmentedControl) {
+        self.programmaticSegmentedControl = [[DNSCastroSegmentedControl alloc] init];
+        self.programmaticSegmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
+        self.programmaticSegmentedControl.backgroundColor = self.stairsSegmentedControl.backgroundColor;
+        [self.view addSubview:self.programmaticSegmentedControl];
+        
+        //Pin to bottom of the stairs SC
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
+                                                              attribute:NSLayoutAttributeTop
+                                                              relatedBy:NSLayoutRelationEqual
+                                                                 toItem:self.stairsSegmentedControl
+                                                              attribute:NSLayoutAttributeBottom
+                                                             multiplier:1
+                                                               constant:40]];
+        
+        //Pin to sides of stairs SC
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
+                                                              attribute:NSLayoutAttributeLeft
+                                                              relatedBy:NSLayoutRelationEqual
+                                                                 toItem:self.stairsSegmentedControl
+                                                              attribute:NSLayoutAttributeLeft
+                                                             multiplier:1
+                                                               constant:0]];
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
+                                                              attribute:NSLayoutAttributeRight
+                                                              relatedBy:NSLayoutRelationEqual
+                                                                 toItem:self.stairsSegmentedControl
+                                                              attribute:NSLayoutAttributeRight
+                                                             multiplier:1
+                                                               constant:0]];
+        
+        //Pin to height of stairs SC
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
+                                                              attribute:NSLayoutAttributeHeight
+                                                              relatedBy:NSLayoutRelationEqual
+                                                                 toItem:self.stairsSegmentedControl
+                                                              attribute:NSLayoutAttributeHeight
+                                                             multiplier:1
+                                                               constant:0]];
+        
+        self.programmaticSegmentedControl.choices = @[@"Programmatic", @"Springs/Struts", @"Autolayout"];
+        self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
+        self.programmaticSegmentedControl.choiceColor = [UIColor orangeColor];
+    }
 }
 
 @end
