@@ -12,7 +12,7 @@ static CGFloat SelectionViewPadding = 3;
 static NSTimeInterval AnimationDuration = 0.2;
 
 static CGFloat SelectedAlpha = 1;
-static CGFloat DeselectedAlpha = 0.5;
+static CGFloat DeselectedAlpha = 0.4;
 
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
@@ -20,6 +20,7 @@ static CGFloat DeselectedAlpha = 0.5;
 @property (nonatomic) CGPoint initialTouchPoint;
 @property (nonatomic) NSLayoutConstraint *selectionLeftConstraint;
 @property (nonatomic) NSInteger initialConstraintConstant;
+@property (nonatomic) BOOL touchesInProgress;
 
 @end
 
@@ -311,31 +312,61 @@ static CGFloat DeselectedAlpha = 0.5;
     }
 }
 
+- (void)animateSelectionViewUpIfNeeded:(BOOL)shorten
+{
+    if (self.touchesInProgress) {
+        CGFloat scaleYPercentage = (SelectionViewPadding * 2) / (CGRectGetHeight(self.frame) - (SelectionViewPadding * 2));
+        scaleYPercentage += 1;
+        
+        CGFloat scaleXPercentage = (SelectionViewPadding * 2) / ([self pointsPerSection]);
+        scaleXPercentage += 1;
+        
+        CGFloat duration = AnimationDuration;
+        if (shorten) {
+            duration /= 2;
+        }
+        
+        [UIView animateWithDuration:duration
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^{
+                             self.selectionView.transform = CGAffineTransformMakeScale(scaleXPercentage, scaleYPercentage);
+                             [self layoutIfNeeded];
+                         }
+                         completion:nil];
+    }
+}
+
 #pragma mark - Touch handling
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesBegan:touches withEvent:event];
-    
+    self.touchesInProgress = YES;
+
     UITouch *touch = [touches anyObject];
     self.initialTouchPoint = [touch locationInView:self];
     self.initialConstraintConstant = self.selectionLeftConstraint.constant;
     
-    //Animate the selection view up
-    CGFloat scaleYPercentage = (SelectionViewPadding * 2) / (CGRectGetHeight(self.frame) - (SelectionViewPadding * 2));
-    scaleYPercentage += 1;
-    
-    CGFloat scaleXPercentage = (SelectionViewPadding * 2) / ([self pointsPerSection]);
-    scaleXPercentage += 1;
-    
-    [UIView animateWithDuration:AnimationDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
-                         self.selectionView.transform = CGAffineTransformMakeScale(scaleXPercentage, scaleYPercentage);
-                         [self layoutIfNeeded];
-                     }
-                     completion:nil];
+    //Figure out where we're at.
+    CGFloat section = self.initialTouchPoint.x / [self pointsPerSection];
+    NSInteger roundedSection = floorf(section);
+    if (self.selectedIndex != roundedSection) {
+        [self setSelectedIndex:roundedSection animated:YES];
+        [UIView animateWithDuration:AnimationDuration
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^{
+                             [self snapToCurrentSection:NO];
+                         } completion:^(BOOL finished) {
+                             self.initialConstraintConstant = self.selectionLeftConstraint.constant;
+                         }];
+        
+        [self performSelector:@selector(animateSelectionViewUpIfNeeded:) withObject:@YES afterDelay:AnimationDuration / 2];
+    } else {
+        //Animate the selection view up
+        [self animateSelectionViewUpIfNeeded:NO];
+    }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -357,9 +388,7 @@ static CGFloat DeselectedAlpha = 0.5;
     CGFloat constantVSMax = MIN(constantVSMin, maxX);
     
     self.selectionLeftConstraint.constant = constantVSMax;
-    
-    NSLog(@"Constant = %@", @(constantVSMax));
-    
+        
     //Figure out where we're at.
     CGFloat section = constantVSMax / [self pointsPerSection];
     NSInteger roundedSection = roundf(section);
@@ -381,6 +410,7 @@ static CGFloat DeselectedAlpha = 0.5;
 
 - (void)touchesEndedOrCancelled
 {
+    self.touchesInProgress = NO;
     [UIView animateWithDuration:AnimationDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseIn
@@ -425,7 +455,7 @@ static CGFloat DeselectedAlpha = 0.5;
         self.selectedIndex = selectedIndex;
         UIView *wasHighlighted = self.sectionViews[previousSelectedIndex];
         UIView *nowHighlighted = self.sectionViews[selectedIndex];
-        [UIView animateWithDuration:AnimationDuration * 2
+        [UIView animateWithDuration:AnimationDuration
                               delay:0
                             options:UIViewAnimationOptionCurveLinear //Crossfade
                          animations:^{
