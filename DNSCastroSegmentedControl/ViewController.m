@@ -10,7 +10,7 @@
 
 #import "DNSCastroSegmentedControl.h"
 
-@interface ViewController ()
+@interface ViewController () <DNSCastroSegmentedControlDelegate>
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *stairsSegmentedControl;
 @property (nonatomic) DNSCastroSegmentedControl *programmaticSegmentedControl;
@@ -49,6 +49,7 @@
         self.programmaticSegmentedControl = [[DNSCastroSegmentedControl alloc] init];
         self.programmaticSegmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
         self.programmaticSegmentedControl.backgroundColor = self.stairsSegmentedControl.backgroundColor;
+        self.programmaticSegmentedControl.delegate = self;
         [self.view addSubview:self.programmaticSegmentedControl];
         
         //Pin to bottom of the stairs SC
@@ -88,7 +89,24 @@
         self.programmaticSegmentedControl.choices = @[@"Programmatic", @"Springs/Struts", @"Autolayout"];
         self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
         self.programmaticSegmentedControl.choiceColor = [UIColor orangeColor];
+        self.programmaticSegmentedControl.selectedIndex = 1;
     }
+}
+
+#pragma mark - DNSCastroSegmentedControlDelegate
+
+- (void)segmentedControl:(DNSCastroSegmentedControl *)control didChangeToSelectedIndex:(NSInteger)selectedIndex
+{
+    NSString *controlName = nil;
+    if (control == self.segmentedControl) {
+        controlName = @"First Segmented Control";
+    } else if (control == self.stairsSegmentedControl) {
+        controlName = @"Stairs Segmented Control";
+    } else if (control == self.programmaticSegmentedControl) {
+        controlName = @"Programmatic Segmented Control";
+    }
+    
+    NSLog(@"Control %@ change to index %@", controlName, @(selectedIndex));
 }
 
 @end

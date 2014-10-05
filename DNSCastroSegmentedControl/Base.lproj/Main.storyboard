@@ -22,6 +22,9 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="rVG-HB-fXl"/>
                                 </constraints>
+                                <connections>
+                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="uLO-Ln-NWy"/>
+                                </connections>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XHm-9W-22v" customClass="DNSCastroSegmentedControl">
                                 <rect key="frame" x="40" y="150" width="520" height="50"/>
@@ -29,6 +32,9 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="TcB-Si-Pjg"/>
                                 </constraints>
+                                <connections>
+                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="rMu-Sy-bOM"/>
+                                </connections>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>

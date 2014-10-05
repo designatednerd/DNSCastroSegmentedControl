@@ -312,6 +312,16 @@ static CGFloat DeselectedAlpha = 0.4;
     }
 }
 
+- (void)setSelectedIndex:(NSInteger)selectedIndex
+{
+    if (_selectedIndex != selectedIndex) {
+        _selectedIndex = selectedIndex;
+        [self.delegate segmentedControl:self didChangeToSelectedIndex:selectedIndex];
+    }
+}
+
+#pragma mark - Animation helpers
+
 - (void)animateSelectionViewUpIfNeeded:(BOOL)shorten
 {
     if (self.touchesInProgress) {
