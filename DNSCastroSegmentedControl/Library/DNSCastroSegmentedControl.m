@@ -8,8 +8,11 @@
 
 #import "DNSCastroSegmentedControl.h"
 
-static CGFloat TopAndBottomPadding = 3;
-static NSTimeInterval AnimationDuration = 0.1;
+static CGFloat SelectionViewPadding = 3;
+static NSTimeInterval AnimationDuration = 0.2;
+
+static CGFloat SelectedAlpha = 1;
+static CGFloat DeselectedAlpha = 0.5;
 
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
@@ -37,7 +40,7 @@ static NSTimeInterval AnimationDuration = 0.1;
         [self setupSelectionView];
         [self roundAllTheThings];
         [self setSelectedIndex:self.selectedIndex animated:NO];
-        [self snapToCurrentSection];
+        [self snapToCurrentSection:NO];
     }
 }
 
@@ -68,16 +71,17 @@ static NSTimeInterval AnimationDuration = 0.1;
         
         //DEBUG
 //        [self addDebugBorderOfColor:[UIColor greenColor] toView:view];
+//        [self setupDebugDotOfColor:[UIColor greenColor] forView:view];
         
         [self addSubview:view];
         
         NSString *viewName = [NSString stringWithFormat:@"view%@", @(i)];
         
         //Pin width to percentage
-        [self pinViewToWidth:view];
+        [self pinViewToWidth:view withPadding:0];
         
         //Pin to top and bottom
-        [self pinViewToTopAndBottom:view withPadding:TopAndBottomPadding];
+        [self pinViewToTopAndBottom:view withPadding:SelectionViewPadding];
         
         //Add to autolayout string to allow pinning next to each other.
         [autolayoutString appendFormat:@"[%@]", viewName];
@@ -106,8 +110,8 @@ static NSTimeInterval AnimationDuration = 0.1;
     }
         
     [self addSubview:self.selectionView];
-    [self pinViewToWidth:self.selectionView];
-    [self pinViewToTopAndBottom:self.selectionView withPadding:TopAndBottomPadding];
+    [self pinViewToWidth:self.selectionView withPadding:SelectionViewPadding * 2];
+    [self pinViewToTopAndBottom:self.selectionView withPadding:SelectionViewPadding];
     
     self.selectionLeftConstraint = [NSLayoutConstraint constraintWithItem:self.selectionView
                                                                 attribute:NSLayoutAttributeLeft
@@ -115,7 +119,7 @@ static NSTimeInterval AnimationDuration = 0.1;
                                                                    toItem:self
                                                                 attribute:NSLayoutAttributeLeft
                                                                multiplier:1
-                                                                 constant:0];
+                                                                 constant:SelectionViewPadding];
     [self addConstraint:self.selectionLeftConstraint];
 }
 
@@ -123,10 +127,10 @@ static NSTimeInterval AnimationDuration = 0.1;
 {
     CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2);
     self.layer.cornerRadius = cornerRadius;
-    self.selectionView.layer.cornerRadius = cornerRadius - TopAndBottomPadding;
+    self.selectionView.layer.cornerRadius = cornerRadius - SelectionViewPadding;
 }
 
-- (void)pinViewToWidth:(UIView *)view
+- (void)pinViewToWidth:(UIView *)view withPadding:(CGFloat)padding
 {
     [self addConstraint:[NSLayoutConstraint constraintWithItem:view
                                                      attribute:NSLayoutAttributeWidth
@@ -134,7 +138,7 @@ static NSTimeInterval AnimationDuration = 0.1;
                                                         toItem:self
                                                      attribute:NSLayoutAttributeWidth
                                                     multiplier:[self sectionPercentage]
-                                                      constant:0]];
+                                                      constant:-padding]];
 }
 
 - (void)pinViewToTopAndBottom:(UIView *)view withPadding:(CGFloat)padding
@@ -223,7 +227,7 @@ static NSTimeInterval AnimationDuration = 0.1;
     if ([keyPath isEqualToString:[self boundsKeyPath]]
         && object == self) {
         //The bounds of the view have changed - we've had a rotation.
-        [self snapToCurrentSection];
+        [self snapToCurrentSection:NO];
     } else {
         [super observeValueForKeyPath:keyPath
                              ofObject:object
@@ -234,6 +238,53 @@ static NSTimeInterval AnimationDuration = 0.1;
 
 
 #pragma mark - Debug helpers
+
+- (void)setupDebugDotOfColor:(UIColor *)color forView:(UIView *)view
+{
+#ifdef DEBUG
+    UIView *dot = [[UIView alloc] init];
+    dot.translatesAutoresizingMaskIntoConstraints = NO;
+    dot.backgroundColor = color;
+    
+    [view addSubview:dot];
+    
+    //Pin height/width
+    CGFloat width = 3;
+    [dot addConstraint:[NSLayoutConstraint constraintWithItem:dot
+                                                    attribute:NSLayoutAttributeHeight
+                                                    relatedBy:NSLayoutRelationEqual
+                                                       toItem:nil
+                                                    attribute:0
+                                                   multiplier:1
+                                                     constant:width]];
+    [dot addConstraint:[NSLayoutConstraint constraintWithItem:dot
+                                                    attribute:NSLayoutAttributeWidth
+                                                    relatedBy:NSLayoutRelationEqual
+                                                       toItem:nil
+                                                    attribute:0
+                                                   multiplier:1
+                                                     constant:width]];
+    
+    
+    //Pin to center.
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:dot
+                                                     attribute:NSLayoutAttributeCenterX
+                                                     relatedBy:NSLayoutRelationEqual
+                                                        toItem:view
+                                                     attribute:NSLayoutAttributeCenterX
+                                                    multiplier:1
+                                                      constant:0]];
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:dot
+                                                     attribute:NSLayoutAttributeCenterY
+                                                     relatedBy:NSLayoutRelationEqual
+                                                        toItem:view
+                                                     attribute:NSLayoutAttributeCenterY
+                                                    multiplier:1
+                                                      constant:0]];
+    
+#endif
+}
+
 
 - (void)addDebugBorderOfColor:(UIColor *)color toView:(UIView *)view
 {
@@ -270,13 +321,19 @@ static NSTimeInterval AnimationDuration = 0.1;
     self.initialTouchPoint = [touch locationInView:self];
     self.initialConstraintConstant = self.selectionLeftConstraint.constant;
     
-    CGFloat scaleXPercentage = (TopAndBottomPadding * 2) / (CGRectGetHeight(self.frame) - (TopAndBottomPadding * 2));
+    //Animate the selection view up
+    CGFloat scaleYPercentage = (SelectionViewPadding * 2) / (CGRectGetHeight(self.frame) - (SelectionViewPadding * 2));
+    scaleYPercentage += 1;
+    
+    CGFloat scaleXPercentage = (SelectionViewPadding * 2) / ([self pointsPerSection]);
+    scaleXPercentage += 1;
     
     [UIView animateWithDuration:AnimationDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
-                         self.selectionView.transform = CGAffineTransformMakeScale(1, (1 + scaleXPercentage));
+                         self.selectionView.transform = CGAffineTransformMakeScale(scaleXPercentage, scaleYPercentage);
+                         [self layoutIfNeeded];
                      }
                      completion:nil];
 }
@@ -292,14 +349,16 @@ static NSTimeInterval AnimationDuration = 0.1;
     CGFloat calculatedConstant = self.initialConstraintConstant + deltaX;
     
     //Get the larger of 0 and the calculated constant.
-    CGFloat constantVSMin = MAX(0, calculatedConstant);
+    CGFloat constantVSMin = MAX((SelectionViewPadding), calculatedConstant);
     
-    CGFloat maxX = CGRectGetWidth(self.frame) - CGRectGetWidth(self.selectionView.frame);
+    CGFloat maxX = CGRectGetWidth(self.frame) - CGRectGetWidth(self.selectionView.frame) + SelectionViewPadding;
     
     //Get the smaller of the previous comparison and the calculated max X.
     CGFloat constantVSMax = MIN(constantVSMin, maxX);
     
     self.selectionLeftConstraint.constant = constantVSMax;
+    
+    NSLog(@"Constant = %@", @(constantVSMax));
     
     //Figure out where we're at.
     CGFloat section = constantVSMax / [self pointsPerSection];
@@ -324,50 +383,55 @@ static NSTimeInterval AnimationDuration = 0.1;
 {
     [UIView animateWithDuration:AnimationDuration
                           delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
+                        options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
                          self.selectionView.transform = CGAffineTransformIdentity;
-                     }
-                     completion:nil];
-    
-    [UIView animateWithDuration:AnimationDuration * 2
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
-                         [self snapToCurrentSection];
+                         //Calls LayoutIfNeeded - no need to call it seperately.
+                         [self snapToCurrentSection:NO];
                      }
                      completion:nil];
 }
 
-- (void)snapToCurrentSection
+- (void)snapToCurrentSection:(BOOL)isEmbiggened;
 {
-    self.selectionLeftConstraint.constant = self.selectedIndex * [self pointsPerSection];
+    CGFloat fullMove = self.selectedIndex * [self pointsPerSection];
+    
+    if (!isEmbiggened) {
+        fullMove += SelectionViewPadding;
+    }
+    
+    self.selectionLeftConstraint.constant =  fullMove;
     [self layoutIfNeeded];
 }
 
 - (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated
 {
-    if (self.selectedIndex != selectedIndex
-        || ! animated) {
+    NSInteger previousSelectedIndex = _selectedIndex;
+    if (!animated) {
         self.selectedIndex = selectedIndex;
-        NSInteger duration = AnimationDuration * 2;
-        if (!animated) {
-            duration = 0;
+        for (NSInteger i = 0; i < self.sectionViews.count; i++) {
+            UIView *currentView = self.sectionViews[i];
+            if (i == selectedIndex) {
+                currentView.alpha = SelectedAlpha;
+            } else {
+                currentView.alpha = DeselectedAlpha;
+            }
         }
-        [UIView animateWithDuration:duration
+        
+        return;
+    } //else, animate!
+    
+    if (self.selectedIndex != selectedIndex) {
+        self.selectedIndex = selectedIndex;
+        UIView *wasHighlighted = self.sectionViews[previousSelectedIndex];
+        UIView *nowHighlighted = self.sectionViews[selectedIndex];
+        [UIView animateWithDuration:AnimationDuration * 2
                               delay:0
-                            options:UIViewAnimationOptionCurveEaseOut
+                            options:UIViewAnimationOptionCurveLinear //Crossfade
                          animations:^{
-                             for (NSInteger i = 0; i < self.sectionViews.count; i++) {
-                                 UIView *currentView = self.sectionViews[i];
-                                 if (i == selectedIndex) {
-                                     currentView.alpha = 1;
-                                 } else {
-                                     currentView.alpha = 0.5;
-                                 }
-                             }
-                         }
-                         completion:nil];
+                             wasHighlighted.alpha = DeselectedAlpha;
+                              nowHighlighted.alpha = SelectedAlpha;
+                         } completion:nil];
     }
 }
 
