@@ -39,7 +39,7 @@
 ///Sets the text color of labels and the tint color of UIViews. If nil, defaults to the tintColor of this view. 
 @property (nonatomic) UIColor *choiceColor;
 
-//The border color of the slider. If nil, defaults to the tintColor of this view. 
+///The border color of the slider. If nil, defaults to the tintColor of this view. 
 @property (nonatomic) UIColor *selectionViewColor;
 
 @end
