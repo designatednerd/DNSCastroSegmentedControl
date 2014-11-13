@@ -208,7 +208,7 @@ static CGFloat DeselectedAlpha = 0.4;
 - (CGSize)intrinsicContentSize
 {
     //TODO: Fix so this works
-    return CGSizeMake(CGRectGetWidth(self.frame), 40);
+    return CGSizeMake(UIViewNoIntrinsicMetric, 40);
 }
 
 - (CGFloat)sectionPercentage
