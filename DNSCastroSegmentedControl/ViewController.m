@@ -78,14 +78,7 @@
                                                              multiplier:1
                                                                constant:0]];
         
-        //Pin to height of stairs SC
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
-                                                              attribute:NSLayoutAttributeHeight
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:self.stairsSegmentedControl
-                                                              attribute:NSLayoutAttributeHeight
-                                                             multiplier:1
-                                                               constant:0]];
+        //NOTE: Height does not need to be pinned due to intrinsic content size. 
         
         self.programmaticSegmentedControl.choices = @[@"Programmatic", @"Springs/Struts", @"Autolayout"];
         self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
