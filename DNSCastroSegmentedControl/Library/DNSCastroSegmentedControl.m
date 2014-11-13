@@ -207,7 +207,11 @@ static CGFloat DeselectedAlpha = 0.4;
 
 - (CGSize)intrinsicContentSize
 {
-    //TODO: Figure out why the hell this isn't working in storyboards - it seems to think it's a tab bar controller?!
+    /**
+     *  NOTE: When using this in a storyboard, you have to select the view, go to
+     *  the Size Inspector tab, and manually set a placeholder for the intrinsic
+     *  content size that matches this size. 
+     */
     return CGSizeMake(UIViewNoIntrinsicMetric, 40);
 }
 
