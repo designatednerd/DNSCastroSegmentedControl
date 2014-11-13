@@ -18,4 +18,4 @@ A segmented control based on the one in the [Castro](http://castrofm.com) settin
 
 ##Images
 
-Images used in the sample app are Creative Commons via [The Noun Project](http://thenounproject.com/).
+Images used in the sample app are Creative Commons Public Domain images found via [The Noun Project](http://thenounproject.com/).
