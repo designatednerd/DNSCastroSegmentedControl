@@ -13,7 +13,7 @@
 @protocol DNSCastroSegmentedControlDelegate <NSObject>
 @required
 /**
- *  Fires when
+ *  Fires when the selection index of the control changes.
  *
  *  @param control       The control which has changed.
  *  @param selectedIndex The newly selected index;  
@@ -41,5 +41,13 @@
 
 ///The border color of the slider. If nil, defaults to the tintColor of this view. 
 @property (nonatomic) UIColor *selectionViewColor;
+
+/**
+ *  Sets the given selected index. 
+ * 
+ *  @param selectedIndex The index you wish to switch the control to
+ *  @param animated      YES if you want this transition to be animated, NO if not.
+ */
+- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated;
 
 @end

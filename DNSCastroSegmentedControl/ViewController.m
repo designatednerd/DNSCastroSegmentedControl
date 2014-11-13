@@ -46,6 +46,7 @@
     [super viewDidLayoutSubviews];
     
     if (!self.programmaticSegmentedControl) {
+        //Add the programmatic segmented control here so that widths are happy.
         self.programmaticSegmentedControl = [[DNSCastroSegmentedControl alloc] init];
         self.programmaticSegmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
         self.programmaticSegmentedControl.backgroundColor = self.stairsSegmentedControl.backgroundColor;
@@ -90,7 +91,17 @@
         self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
         self.programmaticSegmentedControl.choiceColor = [UIColor orangeColor];
         self.programmaticSegmentedControl.selectedIndex = 1;
+        
+        //Uncomment to move automatically after a delay
+//        [self performSelector:@selector(setProgrammaticIndex)
+//                   withObject:nil
+//                   afterDelay:2];
     }
+}
+
+- (void)setProgrammaticIndex
+{
+    [self.programmaticSegmentedControl setSelectedIndex:2 animated:YES];
 }
 
 #pragma mark - DNSCastroSegmentedControlDelegate

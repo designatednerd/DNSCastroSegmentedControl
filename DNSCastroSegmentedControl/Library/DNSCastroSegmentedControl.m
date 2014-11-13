@@ -41,7 +41,6 @@ static CGFloat DeselectedAlpha = 0.4;
         [self setupSelectionView];
         [self roundAllTheThings];
         [self setSelectedIndex:self.selectedIndex animated:NO];
-        [self snapToCurrentSection:NO];
     }
 }
 
@@ -246,6 +245,13 @@ static CGFloat DeselectedAlpha = 0.4;
 
 #pragma mark - Debug helpers
 
+/**
+ *  Adds a wee dot of the given color to the center of the given view which only
+ *  shows up when DEBUG is enabled.
+ *
+ *  @param color The color for the dot.
+ *  @param view  The view to add the debug dot to.
+ */
 - (void)setupDebugDotOfColor:(UIColor *)color forView:(UIView *)view
 {
 #ifdef DEBUG
@@ -292,7 +298,13 @@ static CGFloat DeselectedAlpha = 0.4;
 #endif
 }
 
-
+/**
+ *  Adds a border of the given color to the given view, but only shows up if DEBUG 
+ *  is enabled
+ *
+ *  @param color The color of the border for the view.
+ *  @param view  The view to add the debug border to.
+ */
 - (void)addDebugBorderOfColor:(UIColor *)color toView:(UIView *)view
 {
 #ifdef DEBUG
@@ -438,6 +450,8 @@ static CGFloat DeselectedAlpha = 0.4;
                      completion:nil];
 }
 
+#pragma mark - Animation movements
+
 - (void)snapToCurrentSection:(BOOL)isEmbiggened;
 {
     CGFloat fullMove = self.selectedIndex * [self pointsPerSection];
@@ -464,6 +478,7 @@ static CGFloat DeselectedAlpha = 0.4;
             }
         }
         
+        [self snapToCurrentSection:NO];
         return;
     } //else, animate!
     
@@ -476,8 +491,9 @@ static CGFloat DeselectedAlpha = 0.4;
                             options:UIViewAnimationOptionCurveLinear //Crossfade
                          animations:^{
                              wasHighlighted.alpha = DeselectedAlpha;
-                              nowHighlighted.alpha = SelectedAlpha;
-                         } completion:nil];
+                             nowHighlighted.alpha = SelectedAlpha;
+                         }
+                         completion:nil];
     }
 }
 
