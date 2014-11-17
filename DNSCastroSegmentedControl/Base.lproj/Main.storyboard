@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="vXZ-lx-hvc">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
     </dependencies>
@@ -13,32 +13,44 @@
                         <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" placeholderIntrinsicWidth="infinite" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="ovI-wb-jw2" customClass="DNSCastroSegmentedControl">
-                                <rect key="frame" x="40" y="60" width="520" height="40"/>
+                                <rect key="frame" x="40" y="88" width="240" height="40"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
-                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="uLO-Ln-NWy"/>
+                                    <action selector="DNSCastroSegmentedControlChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="SlJ-uE-ST3"/>
                                 </connections>
                             </view>
                             <view contentMode="scaleToFill" placeholderIntrinsicWidth="infinite" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="XHm-9W-22v" customClass="DNSCastroSegmentedControl">
-                                <rect key="frame" x="40" y="140" width="520" height="40"/>
+                                <rect key="frame" x="40" y="168" width="240" height="40"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
-                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="rMu-Sy-bOM"/>
+                                    <action selector="DNSCastroSegmentedControlChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="hWS-qZ-oIb"/>
                                 </connections>
                             </view>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="27t-dN-biq">
+                                <rect key="frame" x="99" y="20" width="123" height="29"/>
+                                <segments>
+                                    <segment title="First"/>
+                                    <segment title="Second"/>
+                                </segments>
+                                <connections>
+                                    <action selector="standardSegmentedControlChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="P42-v8-a9c"/>
+                                </connections>
+                            </segmentedControl>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="XHm-9W-22v" secondAttribute="trailing" constant="40" id="4le-Ud-K0s"/>
                             <constraint firstAttribute="trailing" secondItem="ovI-wb-jw2" secondAttribute="trailing" constant="40" id="9Wu-6r-EUg"/>
-                            <constraint firstItem="ovI-wb-jw2" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="40" id="EJz-hh-gN4"/>
                             <constraint firstItem="ovI-wb-jw2" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="40" id="Ks2-ZK-gsx"/>
+                            <constraint firstItem="27t-dN-biq" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="aLq-dN-WFv"/>
                             <constraint firstItem="XHm-9W-22v" firstAttribute="top" secondItem="ovI-wb-jw2" secondAttribute="bottom" constant="40" id="f3C-fx-OzS"/>
+                            <constraint firstItem="ovI-wb-jw2" firstAttribute="top" secondItem="27t-dN-biq" secondAttribute="bottom" constant="40" id="hZ5-LF-bmt"/>
                             <constraint firstItem="XHm-9W-22v" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="40" id="izC-OW-Q5Y"/>
+                            <constraint firstAttribute="centerX" secondItem="27t-dN-biq" secondAttribute="centerX" id="yoP-dt-XcW"/>
                         </constraints>
                     </view>
                     <connections>
@@ -51,4 +63,9 @@
             <point key="canvasLocation" x="596" y="162"/>
         </scene>
     </scenes>
+    <simulatedMetricsContainer key="defaultSimulatedMetrics">
+        <simulatedStatusBarMetrics key="statusBar"/>
+        <simulatedOrientationMetrics key="orientation"/>
+        <simulatedScreenMetrics key="destination"/>
+    </simulatedMetricsContainer>
 </document>

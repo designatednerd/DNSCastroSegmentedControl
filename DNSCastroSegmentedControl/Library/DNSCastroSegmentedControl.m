@@ -40,7 +40,7 @@ static CGFloat DeselectedAlpha = 0.4;
         [self setupSectionViews];
         [self setupSelectionView];
         [self roundAllTheThings];
-        [self setSelectedIndex:self.selectedIndex animated:NO];
+        [self setSelectedSegmentIndex:self.selectedSegmentIndex animated:NO];
     }
 }
 
@@ -334,11 +334,11 @@ static CGFloat DeselectedAlpha = 0.4;
     }
 }
 
-- (void)setSelectedIndex:(NSInteger)selectedIndex
+- (void)setSelectedSegmentIndex:(NSInteger)selectedSegmentIndex
 {
-    if (_selectedIndex != selectedIndex) {
-        _selectedIndex = selectedIndex;
-        [self.delegate segmentedControl:self didChangeToSelectedIndex:selectedIndex];
+    if (_selectedSegmentIndex != selectedSegmentIndex) {
+        _selectedSegmentIndex = selectedSegmentIndex;
+        [self sendActionsForControlEvents:UIControlEventValueChanged];
     }
 }
 
@@ -383,8 +383,8 @@ static CGFloat DeselectedAlpha = 0.4;
     //Figure out where we're at.
     CGFloat section = self.initialTouchPoint.x / [self pointsPerSection];
     NSInteger roundedSection = floorf(section);
-    if (self.selectedIndex != roundedSection) {
-        [self setSelectedIndex:roundedSection animated:YES];
+    if (self.selectedSegmentIndex != roundedSection) {
+        [self setSelectedSegmentIndex:roundedSection animated:YES];
         [UIView animateWithDuration:AnimationDuration
                               delay:0
                             options:UIViewAnimationOptionCurveEaseOut
@@ -425,7 +425,7 @@ static CGFloat DeselectedAlpha = 0.4;
     CGFloat section = constantVSMax / [self pointsPerSection];
     NSInteger roundedSection = roundf(section);
     
-    [self setSelectedIndex:roundedSection animated:YES];
+    [self setSelectedSegmentIndex:roundedSection animated:YES];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -458,7 +458,7 @@ static CGFloat DeselectedAlpha = 0.4;
 
 - (void)snapToCurrentSection:(BOOL)isEmbiggened;
 {
-    CGFloat fullMove = self.selectedIndex * [self pointsPerSection];
+    CGFloat fullMove = self.selectedSegmentIndex * [self pointsPerSection];
     
     if (!isEmbiggened) {
         fullMove += SelectionViewPadding;
@@ -468,14 +468,14 @@ static CGFloat DeselectedAlpha = 0.4;
     [self layoutIfNeeded];
 }
 
-- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated
+- (void)setSelectedSegmentIndex:(NSInteger)selectedSegmentIndex animated:(BOOL)animated
 {
-    NSInteger previousSelectedIndex = _selectedIndex;
+    NSInteger previousSelectedSegmentIndex = _selectedSegmentIndex;
     if (!animated) {
-        self.selectedIndex = selectedIndex;
+        self.selectedSegmentIndex = selectedSegmentIndex;
         for (NSInteger i = 0; i < self.sectionViews.count; i++) {
             UIView *currentView = self.sectionViews[i];
-            if (i == selectedIndex) {
+            if (i == selectedSegmentIndex) {
                 currentView.alpha = SelectedAlpha;
             } else {
                 currentView.alpha = DeselectedAlpha;
@@ -486,10 +486,10 @@ static CGFloat DeselectedAlpha = 0.4;
         return;
     } //else, animate!
     
-    if (self.selectedIndex != selectedIndex) {
-        self.selectedIndex = selectedIndex;
-        UIView *wasHighlighted = self.sectionViews[previousSelectedIndex];
-        UIView *nowHighlighted = self.sectionViews[selectedIndex];
+    if (self.selectedSegmentIndex != selectedSegmentIndex) {
+        self.selectedSegmentIndex = selectedSegmentIndex;
+        UIView *wasHighlighted = self.sectionViews[previousSelectedSegmentIndex];
+        UIView *nowHighlighted = self.sectionViews[selectedSegmentIndex];
         [UIView animateWithDuration:AnimationDuration
                               delay:0
                             options:UIViewAnimationOptionCurveLinear //Crossfade
