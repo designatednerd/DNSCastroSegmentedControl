@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "DNSCastroSegmentedControl"
-  s.version      = "1.0.0"
+  s.version      = "1.1.0"
   s.summary      = "A segmented control based on the one in the Castro Podcast app's settings page."
   s.homepage     = "https://github.com/designatednerd/DNSCastroSegmentedControl"
   s.screenshots  = "https://raw.githubusercontent.com/designatednerd/DNSCastroSegmentedControl/master/sample_project.gif"
