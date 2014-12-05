@@ -10,28 +10,13 @@
 
 @class DNSCastroSegmentedControl;
 
-@protocol DNSCastroSegmentedControlDelegate <NSObject>
-@required
-/**
- *  Fires when the selection index of the control changes.
- *
- *  @param control       The control which has changed.
- *  @param selectedIndex The newly selected index;  
- */
-- (void)segmentedControl:(DNSCastroSegmentedControl *)control didChangeToSelectedIndex:(NSInteger)selectedIndex;
-
-@end
-
 @interface DNSCastroSegmentedControl : UIControl
-
-///A delegate to notify of any choice changes.
-@property (nonatomic, weak) IBOutlet id<DNSCastroSegmentedControlDelegate> delegate;
 
 ///An array of the choices for the user. Should be NSString/AttributedString or UIImage.
 @property (nonatomic) NSArray *choices;
 
 ///The current selected index. Zero-indexed. 
-@property (nonatomic) NSInteger selectedIndex;
+@property (nonatomic) NSInteger selectedSegmentIndex;
 
 ///Will set a font to be used for all labels. If nil, the default system font will be used.
 @property (nonatomic) UIFont *labelFont;
@@ -48,6 +33,6 @@
  *  @param selectedIndex The index you wish to switch the control to
  *  @param animated      YES if you want this transition to be animated, NO if not.
  */
-- (void)setSelectedIndex:(NSInteger)selectedIndex animated:(BOOL)animated;
+- (void)setSelectedSegmentIndex:(NSInteger)selectedSegmentIndex animated:(BOOL)animated;
 
 @end

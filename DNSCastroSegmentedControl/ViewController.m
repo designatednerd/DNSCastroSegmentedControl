@@ -10,7 +10,7 @@
 
 #import "DNSCastroSegmentedControl.h"
 
-@interface ViewController () <DNSCastroSegmentedControlDelegate>
+@interface ViewController ()
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *stairsSegmentedControl;
 @property (nonatomic) DNSCastroSegmentedControl *programmaticSegmentedControl;
@@ -25,7 +25,7 @@
     
     self.segmentedControl.choices = @[@"one", @"two", @"three", @"four"];
     self.segmentedControl.labelFont = [UIFont fontWithName:@"AmericanTypewriter" size:17];
-    self.segmentedControl.selectedIndex = 2;
+    self.segmentedControl.selectedSegmentIndex = 2;
     self.segmentedControl.tintColor = [UIColor orangeColor];
     self.segmentedControl.choiceColor = [UIColor whiteColor];
     self.segmentedControl.selectionViewColor = [UIColor greenColor];
@@ -50,7 +50,6 @@
         self.programmaticSegmentedControl = [[DNSCastroSegmentedControl alloc] init];
         self.programmaticSegmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
         self.programmaticSegmentedControl.backgroundColor = self.stairsSegmentedControl.backgroundColor;
-        self.programmaticSegmentedControl.delegate = self;
         [self.view addSubview:self.programmaticSegmentedControl];
         
         //Pin to bottom of the stairs SC
@@ -83,7 +82,9 @@
         self.programmaticSegmentedControl.choices = @[@"Programmatic", @"Springs/Struts", @"Autolayout"];
         self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
         self.programmaticSegmentedControl.choiceColor = [UIColor orangeColor];
-        self.programmaticSegmentedControl.selectedIndex = 1;
+        self.programmaticSegmentedControl.selectedSegmentIndex = 1;
+        
+        [self.programmaticSegmentedControl addTarget:self action:@selector(DNSCastroSegmentedControlChanged:) forControlEvents:UIControlEventValueChanged];
         
         //Uncomment to move automatically after a delay
 //        [self performSelector:@selector(setProgrammaticIndex)
@@ -94,23 +95,25 @@
 
 - (void)setProgrammaticIndex
 {
-    [self.programmaticSegmentedControl setSelectedIndex:2 animated:YES];
+    [self.programmaticSegmentedControl setSelectedSegmentIndex:2 animated:YES];
 }
 
-#pragma mark - DNSCastroSegmentedControlDelegate
+- (IBAction)standardSegmentedControlChanged:(UISegmentedControl *)sender {
+    NSLog(@"%s Standard segmented control change to index %@",__PRETTY_FUNCTION__,@(sender.selectedSegmentIndex));
+}
 
-- (void)segmentedControl:(DNSCastroSegmentedControl *)control didChangeToSelectedIndex:(NSInteger)selectedIndex
+- (IBAction)DNSCastroSegmentedControlChanged:(DNSCastroSegmentedControl *)sender
 {
     NSString *controlName = nil;
-    if (control == self.segmentedControl) {
+    if (sender == self.segmentedControl) {
         controlName = @"First Segmented Control";
-    } else if (control == self.stairsSegmentedControl) {
+    } else if (sender == self.stairsSegmentedControl) {
         controlName = @"Stairs Segmented Control";
-    } else if (control == self.programmaticSegmentedControl) {
+    } else if (sender == self.programmaticSegmentedControl) {
         controlName = @"Programmatic Segmented Control";
     }
     
-    NSLog(@"Control %@ change to index %@", controlName, @(selectedIndex));
+    NSLog(@"Control %@ change to index %@", controlName, @(sender.selectedSegmentIndex));
 }
 
 @end
