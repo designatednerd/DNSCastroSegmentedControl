@@ -11,6 +11,7 @@
 #import "DNSCastroSegmentedControl.h"
 
 @interface ViewController ()
+@property (nonatomic, weak) IBOutlet UISegmentedControl *standardSegmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *stairsSegmentedControl;
 @property (nonatomic) DNSCastroSegmentedControl *programmaticSegmentedControl;
@@ -21,9 +22,17 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
     
-    self.segmentedControl.choices = @[@"one", @"two", @"three", @"four"];
+    //Make the standard segmented control more visible on the black bg. 
+    self.standardSegmentedControl.tintColor = [UIColor whiteColor];
+    
+    //Setup the choices for the IBOutlet segmented controls.
+    self.segmentedControl.choices = @[
+                                      @"one",
+                                      @"two",
+                                      @"three",
+                                      @"four",
+                                      ];
     self.segmentedControl.labelFont = [UIFont fontWithName:@"AmericanTypewriter" size:17];
     self.segmentedControl.selectedSegmentIndex = 2;
     self.segmentedControl.tintColor = [UIColor orangeColor];
@@ -69,6 +78,7 @@
                                                               attribute:NSLayoutAttributeLeft
                                                              multiplier:1
                                                                constant:0]];
+        
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
                                                               attribute:NSLayoutAttributeRight
                                                               relatedBy:NSLayoutRelationEqual
@@ -77,14 +87,15 @@
                                                              multiplier:1
                                                                constant:0]];
         
-        //NOTE: Height does not need to be pinned due to intrinsic content size. 
-        
+        //NOTE: Height does not need to be pinned due to intrinsic content size.
         self.programmaticSegmentedControl.choices = @[@"Programmatic", @"Springs/Struts", @"Autolayout"];
         self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
         self.programmaticSegmentedControl.choiceColor = [UIColor orangeColor];
         self.programmaticSegmentedControl.selectedSegmentIndex = 1;
         
-        [self.programmaticSegmentedControl addTarget:self action:@selector(DNSCastroSegmentedControlChanged:) forControlEvents:UIControlEventValueChanged];
+        [self.programmaticSegmentedControl addTarget:self
+                                              action:@selector(customSegmentedControlChanged:)
+                                    forControlEvents:UIControlEventValueChanged];
         
         //Uncomment to move automatically after a delay
 //        [self performSelector:@selector(setProgrammaticIndex)
@@ -98,11 +109,12 @@
     [self.programmaticSegmentedControl setSelectedSegmentIndex:2 animated:YES];
 }
 
-- (IBAction)standardSegmentedControlChanged:(UISegmentedControl *)sender {
-    NSLog(@"%s Standard segmented control change to index %@",__PRETTY_FUNCTION__,@(sender.selectedSegmentIndex));
+- (IBAction)standardSegmentedControlChanged:(UISegmentedControl *)sender
+{
+    NSLog(@"Standard segmented control changed to index %@", @(sender.selectedSegmentIndex));
 }
 
-- (IBAction)DNSCastroSegmentedControlChanged:(DNSCastroSegmentedControl *)sender
+- (IBAction)customSegmentedControlChanged:(DNSCastroSegmentedControl *)sender
 {
     NSString *controlName = nil;
     if (sender == self.segmentedControl) {
@@ -113,7 +125,7 @@
         controlName = @"Programmatic Segmented Control";
     }
     
-    NSLog(@"Control %@ change to index %@", controlName, @(sender.selectedSegmentIndex));
+    NSLog(@"Control %@ changed to index %@", controlName, @(sender.selectedSegmentIndex));
 }
 
 @end
