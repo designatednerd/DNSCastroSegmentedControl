@@ -8,10 +8,11 @@
 
 #import "DNSCastroSegmentedControl.h"
 
-static CGFloat SelectionViewPadding = 3;
+static CGFloat TextPadding = 10.0f;
+static CGFloat SelectionViewPadding = 3.0f;
 static NSTimeInterval AnimationDuration = 0.2;
 
-static CGFloat SelectedAlpha = 1;
+static CGFloat SelectedAlpha = 1.0f;
 static CGFloat DeselectedAlpha = 0.4;
 
 @interface DNSCastroSegmentedControl()
@@ -78,7 +79,7 @@ static CGFloat DeselectedAlpha = 0.4;
         NSString *viewName = [NSString stringWithFormat:@"view%@", @(i)];
         
         //Pin width to percentage
-        [self pinViewToWidth:view withPadding:0];
+        [self pinViewToWidth:view withPadding:0.0f];
         
         //Pin to top and bottom
         [self pinViewToTopAndBottom:view withPadding:SelectionViewPadding];
@@ -119,7 +120,7 @@ static CGFloat DeselectedAlpha = 0.4;
                                                                    toItem:self
                                                                 attribute:NSLayoutAttributeLeft
                                                                multiplier:1
-                                                                 constant:SelectionViewPadding];
+                                                                 constant:-SelectionViewPadding];
     [self addConstraint:self.selectionLeftConstraint];
 }
 
@@ -132,13 +133,21 @@ static CGFloat DeselectedAlpha = 0.4;
 
 - (void)pinViewToWidth:(UIView *)view withPadding:(CGFloat)padding
 {
+    CGFloat maxWidth = 0.0f;
+    for (id choice in self.choices) {
+        UIView *view = [self viewForChoice:choice];
+        [view sizeToFit];
+        CGFloat viewWidth = CGRectGetWidth(view.bounds) + TextPadding * 2.0f;
+        maxWidth = (viewWidth > maxWidth) ? viewWidth : maxWidth;
+    }
+    
     [self addConstraint:[NSLayoutConstraint constraintWithItem:view
                                                      attribute:NSLayoutAttributeWidth
                                                      relatedBy:NSLayoutRelationEqual
-                                                        toItem:self
-                                                     attribute:NSLayoutAttributeWidth
-                                                    multiplier:[self sectionPercentage]
-                                                      constant:-padding]];
+                                                        toItem:nil
+                                                     attribute:NSLayoutAttributeNotAnAttribute
+                                                    multiplier:1.0f
+                                                      constant:maxWidth - padding]];
 }
 
 - (void)pinViewToTopAndBottom:(UIView *)view withPadding:(CGFloat)padding
