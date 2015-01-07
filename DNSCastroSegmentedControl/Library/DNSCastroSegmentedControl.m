@@ -10,7 +10,6 @@
 
 static CGFloat TextPadding = 10.0f;
 static CGFloat SelectionViewPadding = 3.0f;
-static CGFloat VerticalPadding = 3.0f;
 static NSTimeInterval AnimationDuration = 0.2;
 
 static CGFloat SelectedAlpha = 1.0f;
@@ -83,7 +82,7 @@ static CGFloat DeselectedAlpha = 0.4;
         [self pinViewToWidth:view withPadding:0.0f];
         
         //Pin to top and bottom
-        [self pinViewToTopAndBottom:view withPadding:VerticalPadding];
+        [self pinViewToTopAndBottom:view withPadding:SelectionViewPadding];
         
         //Add to autolayout string to allow pinning next to each other.
         [autolayoutString appendFormat:@"[%@]", viewName];
@@ -113,7 +112,7 @@ static CGFloat DeselectedAlpha = 0.4;
         
     [self addSubview:self.selectionView];
     [self pinViewToWidth:self.selectionView withPadding:SelectionViewPadding * 2];
-    [self pinViewToTopAndBottom:self.selectionView withPadding:VerticalPadding];
+    [self pinViewToTopAndBottom:self.selectionView withPadding:SelectionViewPadding];
     
     self.selectionLeftConstraint = [NSLayoutConstraint constraintWithItem:self.selectionView
                                                                 attribute:NSLayoutAttributeLeft
