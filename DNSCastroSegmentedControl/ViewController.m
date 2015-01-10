@@ -14,6 +14,7 @@
 @property (nonatomic, weak) IBOutlet UISegmentedControl *standardSegmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *stairsSegmentedControl;
+@property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *autosizedSegmentedControl;
 @property (nonatomic) DNSCastroSegmentedControl *programmaticSegmentedControl;
 @end
 
@@ -35,7 +36,6 @@
                                       ];
     self.segmentedControl.labelFont = [UIFont fontWithName:@"AmericanTypewriter" size:17];
     self.segmentedControl.selectedSegmentIndex = 2;
-    self.segmentedControl.tintColor = [UIColor orangeColor];
     self.segmentedControl.choiceColor = [UIColor whiteColor];
     self.segmentedControl.selectionViewColor = [UIColor greenColor];
     
@@ -45,9 +45,22 @@
                                             @"Elevator",
                                             ];
     self.stairsSegmentedControl.labelFont = [UIFont fontWithName:@"HoeflerText-Regular" size:15];
-    self.stairsSegmentedControl.tintColor = [UIColor whiteColor];
     self.stairsSegmentedControl.choiceColor = [UIColor yellowColor];
     self.stairsSegmentedControl.selectionViewColor = [UIColor redColor];
+    
+    //This control is only pinned to the center and will automatically size itself based on the length of the longest item.
+    self.autosizedSegmentedControl.choices = @[
+                                               @"Sizing",
+                                               @"Is Cool",
+                                               ];
+    //Uncomment to see auto-sizing.
+//    self.autosizedSegmentedControl.choices = @[
+//                                                @"Automatic Sizing",
+//                                                @"Is Cool"
+//                                               ];
+    
+    self.autosizedSegmentedControl.choiceColor = [UIColor greenColor];
+    self.autosizedSegmentedControl.selectionViewColor = [UIColor greenColor];
 }
 
 - (void)viewDidLayoutSubviews
@@ -61,11 +74,11 @@
         self.programmaticSegmentedControl.backgroundColor = self.stairsSegmentedControl.backgroundColor;
         [self.view addSubview:self.programmaticSegmentedControl];
         
-        //Pin to bottom of the stairs SC
+        //Pin to bottom of the autosized SC
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
                                                               attribute:NSLayoutAttributeTop
                                                               relatedBy:NSLayoutRelationEqual
-                                                                 toItem:self.stairsSegmentedControl
+                                                                 toItem:self.autosizedSegmentedControl
                                                               attribute:NSLayoutAttributeBottom
                                                              multiplier:1
                                                                constant:40]];
@@ -123,6 +136,8 @@
         controlName = @"Stairs Segmented Control";
     } else if (sender == self.programmaticSegmentedControl) {
         controlName = @"Programmatic Segmented Control";
+    } else if (sender == self.autosizedSegmentedControl) {
+        controlName = @"Auto-sized Segmented Control";
     }
     
     NSLog(@"Control %@ changed to index %@", controlName, @(sender.selectedSegmentIndex));
