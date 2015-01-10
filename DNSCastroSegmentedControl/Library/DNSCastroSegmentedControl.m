@@ -14,6 +14,8 @@ static NSTimeInterval AnimationDuration = 0.2;
 static CGFloat SelectedAlpha = 1;
 static CGFloat DeselectedAlpha = 0.4;
 
+static CGFloat DefaultHeight = 40;
+
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
 @property (nonatomic) NSArray *sectionViews;
@@ -210,9 +212,43 @@ static CGFloat DeselectedAlpha = 0.4;
     /**
      *  NOTE: When using this in a storyboard, you have to select the view, go to
      *  the Size Inspector tab, and manually set a placeholder for the intrinsic
-     *  content size that matches this size. 
+     *  content size that matches this height, and sets a desired width.
      */
-    return CGSizeMake(UIViewNoIntrinsicMetric, 40);
+    return CGSizeMake([self minimumWidthForChoices], DefaultHeight);
+}
+
+- (CGFloat)minimumWidthForChoices
+{
+    CGFloat greatestWidth = 0;
+    for (id object in self.choices) {
+        CGFloat currentWidth = 0;
+        if ([object isKindOfClass:[UIImage class]]) {
+            UIImage *image = (UIImage *)object;
+            currentWidth = image.size.width;
+        } else if ([object isKindOfClass:[NSAttributedString class]]) {
+            NSAttributedString *attributedString = (NSAttributedString *)object;
+            CGRect attributedBounding = [attributedString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, DefaultHeight)
+                                                                       options:0
+                                                                       context:NULL];
+            currentWidth = CGRectGetWidth(attributedBounding);
+        } else if ([object isKindOfClass:[NSString class]]) {
+            NSString *string = (NSString *)object;
+            CGRect bounding = [string boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, DefaultHeight)
+                                                   options:0
+                                                attributes:@{ NSFontAttributeName : self.labelFont }
+                                                   context:NULL];
+            currentWidth = CGRectGetWidth(bounding);
+        }
+        
+        if (currentWidth > greatestWidth) {
+            greatestWidth = currentWidth;
+        }
+    }
+    
+    CGFloat singleChoiceWidth = greatestWidth + DefaultHeight / 2;
+    CGFloat totalWidth = singleChoiceWidth * self.choices.count;
+    
+    return totalWidth;
 }
 
 - (CGFloat)sectionPercentage
@@ -320,6 +356,19 @@ static CGFloat DeselectedAlpha = 0.4;
 {
     view.layer.borderWidth = 1;
     view.layer.borderColor = color.CGColor;
+}
+
+#pragma mark - Overridden getters
+
+- (UIFont *)labelFont
+{
+    if (_labelFont) {
+        return _labelFont;
+    } else {
+        //Use the default system font.
+        //TODO: Figure out how to get default current system font size.
+        return [UIFont systemFontOfSize:17];
+    }
 }
 
 #pragma mark - Overridden setters
