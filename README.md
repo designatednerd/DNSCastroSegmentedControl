@@ -11,10 +11,10 @@ A segmented control based on the one in the [Castro](http://castrofm.com) settin
 - Background, text/image, and selection colors customizable
 - Fonts for text customizable
 - Automatically responds to bounds changes, so rotation or other bounds changes are handled easily. 
+- Can calculate its own intrinsic content width given the contents of the choices. 
 - Compatible with iOS 7+. 
 
 ##//TODOs
-* Add support for automatically calculating `intrinsicContentSize` width to fix [#3 - control cannot calculate its own width](https://github.com/designatednerd/DNSCastroSegmentedControl/issues/3)
 * ??? - File an issue!
 
 ##Images
