@@ -18,6 +18,7 @@ static CGFloat DefaultHeight = 40;
 
 @interface DNSCastroSegmentedControl()
 @property (nonatomic) UIView *selectionView;
+@property (nonatomic) UIView *selectionBackgroundView;
 @property (nonatomic) NSArray *sectionViews;
 @property (nonatomic) CGPoint initialTouchPoint;
 @property (nonatomic) NSLayoutConstraint *selectionLeftConstraint;
@@ -41,6 +42,7 @@ static CGFloat DefaultHeight = 40;
         [self setupKVO];
         [self setupSectionViews];
         [self setupSelectionView];
+        [self setupSelectionBackgroundView];
         [self roundAllTheThings];
         [self setSelectedSegmentIndex:self.selectedSegmentIndex animated:NO];
     }
@@ -125,11 +127,52 @@ static CGFloat DefaultHeight = 40;
     [self addConstraint:self.selectionLeftConstraint];
 }
 
+- (void)setupSelectionBackgroundView
+{
+    self.selectionBackgroundView = [[UIView alloc] init];
+    self.selectionBackgroundView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    if (self.selectionBackgroundColor) {
+        self.selectionBackgroundView.backgroundColor = self.selectionBackgroundColor;
+    } else {
+        self.selectionBackgroundView.backgroundColor = [UIColor clearColor];
+    }
+    
+    //Insert below the labels
+    [self insertSubview:self.selectionBackgroundView belowSubview:[self.sectionViews firstObject]];
+    
+    //Pin in all directions to the chiclet.
+    [self pinView:self.selectionBackgroundView
+      toOtherView:self.selectionView
+        attribute:NSLayoutAttributeRight];
+    [self pinView:self.selectionBackgroundView
+      toOtherView:self.selectionView
+        attribute:NSLayoutAttributeLeft];
+    [self pinView:self.selectionBackgroundView
+      toOtherView:self.selectionView
+        attribute:NSLayoutAttributeTop];
+    [self pinView:self.selectionBackgroundView
+      toOtherView:self.selectionView
+        attribute:NSLayoutAttributeBottom];
+}
+
 - (void)roundAllTheThings
 {
     CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2);
     self.layer.cornerRadius = cornerRadius;
     self.selectionView.layer.cornerRadius = cornerRadius - SelectionViewPadding;
+    self.selectionBackgroundView.layer.cornerRadius = cornerRadius - SelectionViewPadding;
+}
+
+- (void)pinView:(UIView *)view1 toOtherView:(UIView *)view2 attribute:(NSLayoutAttribute)attribute
+{
+    [self addConstraint:[NSLayoutConstraint constraintWithItem:view1
+                                                     attribute:attribute
+                                                     relatedBy:NSLayoutRelationEqual
+                                                        toItem:view2
+                                                     attribute:attribute
+                                                    multiplier:1
+                                                      constant:0]];
 }
 
 - (void)pinViewToWidth:(UIView *)view withPadding:(CGFloat)padding
@@ -383,6 +426,15 @@ static CGFloat DefaultHeight = 40;
     }
 }
 
+- (void)setSelectionBackgroundColor:(UIColor *)selectionBackgroundColor
+{
+    _selectionBackgroundColor = selectionBackgroundColor;
+    
+    if (self.selectionBackgroundView) {
+        self.selectionBackgroundView.backgroundColor = selectionBackgroundColor;
+    }
+}
+
 - (void)setSelectedSegmentIndex:(NSInteger)selectedSegmentIndex
 {
     if (_selectedSegmentIndex != selectedSegmentIndex) {
@@ -412,6 +464,7 @@ static CGFloat DefaultHeight = 40;
                             options:UIViewAnimationOptionCurveEaseOut
                          animations:^{
                              self.selectionView.transform = CGAffineTransformMakeScale(scaleXPercentage, scaleYPercentage);
+                             self.selectionBackgroundView.transform = CGAffineTransformMakeScale(scaleXPercentage, scaleYPercentage);
                              [self layoutIfNeeded];
                          }
                          completion:nil];
@@ -497,6 +550,7 @@ static CGFloat DefaultHeight = 40;
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
                          self.selectionView.transform = CGAffineTransformIdentity;
+                         self.selectionBackgroundView.transform = CGAffineTransformIdentity;
                          //Calls LayoutIfNeeded - no need to call it seperately.
                          [self snapToCurrentSection:NO];
                      }

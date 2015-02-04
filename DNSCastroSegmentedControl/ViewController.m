@@ -15,6 +15,7 @@
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *segmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *stairsSegmentedControl;
 @property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *autosizedSegmentedControl;
+@property (nonatomic, weak) IBOutlet DNSCastroSegmentedControl *coloredSelectionBackgroundSegmentedControl;
 @property (nonatomic) DNSCastroSegmentedControl *programmaticSegmentedControl;
 @end
 
@@ -61,6 +62,15 @@
     
     self.autosizedSegmentedControl.choiceColor = [UIColor greenColor];
     self.autosizedSegmentedControl.selectionViewColor = [UIColor greenColor];
+    
+    self.coloredSelectionBackgroundSegmentedControl.choices = @[
+                                                                @"Colored",
+                                                                @"Background",
+                                                                ];
+    //Use a red background and no outline.
+    self.coloredSelectionBackgroundSegmentedControl.selectionBackgroundColor = [UIColor redColor];
+    self.coloredSelectionBackgroundSegmentedControl.selectionViewColor = [UIColor clearColor];
+    self.coloredSelectionBackgroundSegmentedControl.choiceColor = [UIColor whiteColor];
 }
 
 - (void)viewDidLayoutSubviews
@@ -74,11 +84,11 @@
         self.programmaticSegmentedControl.backgroundColor = self.stairsSegmentedControl.backgroundColor;
         [self.view addSubview:self.programmaticSegmentedControl];
         
-        //Pin to bottom of the autosized SC
+        //Pin to bottom of the colored SC
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.programmaticSegmentedControl
                                                               attribute:NSLayoutAttributeTop
                                                               relatedBy:NSLayoutRelationEqual
-                                                                 toItem:self.autosizedSegmentedControl
+                                                                 toItem:self.coloredSelectionBackgroundSegmentedControl
                                                               attribute:NSLayoutAttributeBottom
                                                              multiplier:1
                                                                constant:40]];

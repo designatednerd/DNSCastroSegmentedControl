@@ -27,6 +27,9 @@
 ///The border color of the slider. If nil, defaults to the tintColor of this view. 
 @property (nonatomic) UIColor *selectionViewColor;
 
+///The background color of the selection chiclet. If nil, defaults to [UIColor clearColor].
+@property (nonatomic) UIColor *selectionBackgroundColor;
+
 /**
  *  Sets the given selected index. 
  * 
