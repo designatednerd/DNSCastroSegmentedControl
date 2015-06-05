@@ -1,7 +1,7 @@
 DNSCastroSegmentedControl
 =========================
 
-A segmented control based on the one in the [Castro](http://castrofm.com) settings page. 
+A segmented control based on the one in the [Castro](http://castro.fm) settings page. 
 
 ![](sample_project.gif)
 
