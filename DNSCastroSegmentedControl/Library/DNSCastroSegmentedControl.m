@@ -531,13 +531,13 @@ static CGFloat DefaultHeight = 40;
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [super touchesMoved:touches withEvent:event];
+    [super touchesEnded:touches withEvent:event];
     [self touchesEndedOrCancelled];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [super touchesMoved:touches withEvent:event];
+    [super touchesCancelled:touches withEvent:event];
     [self touchesEndedOrCancelled];
 }
 
