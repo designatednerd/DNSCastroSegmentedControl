@@ -24,6 +24,7 @@ static CGFloat DefaultHeight = 40;
 @property (nonatomic) NSLayoutConstraint *selectionLeftConstraint;
 @property (nonatomic) NSInteger initialConstraintConstant;
 @property (nonatomic) BOOL touchesInProgress;
+@property (nonatomic) NSInteger valueAtStartOfTouches;
 
 @end
 
@@ -412,7 +413,9 @@ static CGFloat DefaultHeight = 40;
 {
     if (_selectedSegmentIndex != selectedSegmentIndex) {
         _selectedSegmentIndex = selectedSegmentIndex;
-        [self sendActionsForControlEvents:UIControlEventValueChanged];
+        if (!self.touchesInProgress) {
+            [self sendActionsForControlEvents:UIControlEventValueChanged];
+        }
     }
 }
 
@@ -450,6 +453,7 @@ static CGFloat DefaultHeight = 40;
 {
     [super touchesBegan:touches withEvent:event];
     self.touchesInProgress = YES;
+    self.valueAtStartOfTouches = self.selectedSegmentIndex;
 
     UITouch *touch = [touches anyObject];
     self.initialTouchPoint = [touch locationInView:self];
@@ -512,12 +516,22 @@ static CGFloat DefaultHeight = 40;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesCancelled:touches withEvent:event];
+    
+    //Reset the selected segment index to what it was initially.
+    self.selectedSegmentIndex = self.valueAtStartOfTouches;
+    
     [self touchesEndedOrCancelled];
 }
 
 - (void)touchesEndedOrCancelled
 {
     self.touchesInProgress = NO;
+    
+    //If the value has changed, send that action.
+    if (self.valueAtStartOfTouches != self.selectedSegmentIndex) {
+        [self sendActionsForControlEvents:UIControlEventValueChanged];
+    }
+    
     [UIView animateWithDuration:AnimationDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseIn
