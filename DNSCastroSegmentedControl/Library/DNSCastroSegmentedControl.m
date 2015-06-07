@@ -29,6 +29,8 @@ static CGFloat DefaultHeight = 40;
 
 @implementation DNSCastroSegmentedControl
 
+#pragma mark - View Lifecycle
+
 - (void)layoutSubviews
 {
     //Make sure there are choices before moving forward. 
@@ -38,7 +40,6 @@ static CGFloat DefaultHeight = 40;
     
     if (self.choices && !self.sectionViews) {
         //Perform initial setup.
-        [self setupKVO];
         [self setupSectionViews];
         [self setupSelectionView];
         [self setupSelectionBackgroundView];
@@ -47,20 +48,15 @@ static CGFloat DefaultHeight = 40;
     }
 }
 
-- (void)dealloc
+- (void)setBounds:(CGRect)bounds
 {
-    [self removeObserver:self forKeyPath:[self boundsKeyPath]];
+    [super setBounds:bounds];
+    
+    // Bounds change = chiclet placement needs to be updated.
+    [self snapToCurrentSection:NO];
 }
 
 #pragma mark - Setup Helpers
-
-- (void)setupKVO
-{
-    [self addObserver:self
-           forKeyPath:[self boundsKeyPath]
-              options:0
-              context:NULL];
-}
 
 - (void)setupSectionViews
 {
@@ -302,28 +298,6 @@ static CGFloat DefaultHeight = 40;
 {
     return CGRectGetWidth(self.frame) * [self sectionPercentage];
 }
-
-#pragma mark - KVO
-
-- (NSString *)boundsKeyPath
-{
-    return NSStringFromSelector(@selector(bounds));
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    if ([keyPath isEqualToString:[self boundsKeyPath]]
-        && object == self) {
-        //The bounds of the view have changed - we've had a rotation.
-        [self snapToCurrentSection:NO];
-    } else {
-        [super observeValueForKeyPath:keyPath
-                             ofObject:object
-                               change:change
-                              context:context];
-    }
-}
-
 
 #pragma mark - Debug helpers
 
