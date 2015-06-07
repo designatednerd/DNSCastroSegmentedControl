@@ -31,11 +31,10 @@ static CGFloat DefaultHeight = 40;
 
 - (void)layoutSubviews
 {
-    [super layoutSubviews];
+    //Make sure there are choices before moving forward. 
+    NSAssert(self.choices, @"Cannot setup with no choices set!");
     
-    if (!self.choices) {
-        NSAssert(@"NO", @"Cannot setup with no choices set!");
-    }
+    [super layoutSubviews];
     
     if (self.choices && !self.sectionViews) {
         //Perform initial setup.
