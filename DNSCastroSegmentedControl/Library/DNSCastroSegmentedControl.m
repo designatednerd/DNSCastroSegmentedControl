@@ -518,7 +518,7 @@ static CGFloat DefaultHeight = 40;
     [super touchesCancelled:touches withEvent:event];
     
     //Reset the selected segment index to what it was initially.
-    self.selectedSegmentIndex = self.valueAtStartOfTouches;
+    [self setSelectedSegmentIndex:self.valueAtStartOfTouches animated:YES];
     
     [self touchesEndedOrCancelled];
 }
