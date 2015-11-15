@@ -115,6 +115,7 @@
         self.programmaticSegmentedControl.labelFont = [UIFont fontWithName:@"AppleSDGothicNeo-Medium" size:14];
         self.programmaticSegmentedControl.choiceColor = [UIColor orangeColor];
         self.programmaticSegmentedControl.selectedSegmentIndex = 1;
+        self.programmaticSegmentedControl.cornerRadius = 15;
         
         [self.programmaticSegmentedControl addTarget:self
                                               action:@selector(customSegmentedControlChanged:)

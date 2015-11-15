@@ -154,7 +154,7 @@ static CGFloat DefaultHeight = 40;
 
 - (void)roundAllTheThings
 {
-    CGFloat cornerRadius = (CGRectGetHeight(self.frame) / 2);
+    CGFloat cornerRadius = self.cornerRadius;
     self.layer.cornerRadius = cornerRadius;
     self.selectionView.layer.cornerRadius = cornerRadius - SelectionViewPadding;
     self.selectionBackgroundView.layer.cornerRadius = cornerRadius - SelectionViewPadding;
@@ -385,6 +385,15 @@ static CGFloat DefaultHeight = 40;
         //Use the default system font.
         //TODO: Figure out how to get default current system font size.
         return [UIFont systemFontOfSize:17];
+    }
+}
+
+- (CGFloat)cornerRadius
+{
+    if (_cornerRadius) {
+        return _cornerRadius;
+    } else {
+        return (CGRectGetHeight(self.frame) / 2);
     }
 }
 

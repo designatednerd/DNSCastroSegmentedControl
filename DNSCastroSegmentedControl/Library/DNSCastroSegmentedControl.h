@@ -30,6 +30,9 @@
 ///The background color of the selection chiclet. If nil, defaults to [UIColor clearColor].
 @property (nonatomic) UIColor *selectionBackgroundColor;
 
+///The corner radius of the view. Defaults to half the height of the view, and adjusts the corner radius of the selection view accordingly. 
+@property (nonatomic, assign) CGFloat cornerRadius;
+
 /**
  *  Sets the given selected index. 
  * 
