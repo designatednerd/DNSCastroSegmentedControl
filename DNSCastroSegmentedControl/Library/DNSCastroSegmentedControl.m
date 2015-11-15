@@ -586,6 +586,10 @@ static CGFloat DefaultHeight = 40;
                          animations:^{
                              wasHighlighted.alpha = DeselectedAlpha;
                              nowHighlighted.alpha = SelectedAlpha;
+                             
+                             if (!self.touchesInProgress) {
+                                 [self snapToCurrentSection:NO];
+                             }
                          }
                          completion:nil];
     }
